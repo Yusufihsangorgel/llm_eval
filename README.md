@@ -9,6 +9,8 @@ unit tests: a prompt, a list of checks, and a report you can read in CI.
 that takes a prompt and returns the model output, and it handles running
 cases concurrently, checking outputs, caching responses, and reporting.
 
+![Diagram: suite.run runs each case concurrently through a response cache, checks, and an optional LLM judge, then aggregates the results into an EvalReport](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/architecture.png)
+
 ## Why
 
 Dart and Flutter apps that call LLMs usually have no automated way to catch

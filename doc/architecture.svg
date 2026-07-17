@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="470" viewBox="0 0 1180 470" font-family="Menlo, monospace">
+  <defs>
+    <marker id="arw" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#38BDF8"/>
+    </marker>
+    <marker id="arwd" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <rect width="1180" height="470" fill="#0B1220"/>
+  <text x="48" y="56" font-size="26" font-weight="bold" fill="#E2E8F0">How llm_eval runs a suite</text>
+  <text x="48" y="86" font-size="15" fill="#94A3B8">You bind one model function. The harness runs the cases, checks outputs, caches responses, and reports.</text>
+
+  <!-- concurrency stack: ghost copies of the per-case zone -->
+  <rect x="350" y="116" width="562" height="300" rx="12" fill="none" stroke="#1E3A5F" stroke-width="1.2" stroke-opacity="0.25"/>
+  <rect x="344" y="122" width="562" height="300" rx="12" fill="none" stroke="#1E3A5F" stroke-width="1.2" stroke-opacity="0.4"/>
+
+  <!-- SUITE zone -->
+  <rect x="48" y="128" width="250" height="300" rx="12" fill="#0E1A2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="72" y="160" font-size="14" fill="#64748B">SUITE</text>
+
+  <rect x="72" y="196" width="202" height="72" rx="8" fill="#111C2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="88" y="224" font-size="15" fill="#E2E8F0">EvalSuite([ ... ])</text>
+  <text x="88" y="246" font-size="12.5" fill="#94A3B8">id, prompt, checks</text>
+
+  <rect x="72" y="292" width="202" height="72" rx="8" fill="#111C2E" stroke="#38BDF8" stroke-width="1.5"/>
+  <text x="88" y="320" font-size="15" fill="#E2E8F0">suite.run(model)</text>
+  <text x="88" y="342" font-size="12.5" fill="#94A3B8">modelId, cache, repeat</text>
+
+  <text x="72" y="394" font-size="12" fill="#64748B">returns a Future EvalReport</text>
+
+  <!-- PER CASE zone -->
+  <rect x="338" y="128" width="562" height="300" rx="12" fill="#0E1A2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="362" y="160" font-size="14" fill="#64748B">PER CASE  ·  RUNS CONCURRENTLY</text>
+
+  <!-- model (external, dashed) -->
+  <rect x="362" y="190" width="176" height="56" rx="8" fill="#0E1A2E" stroke="#1E3A5F" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="378" y="215" font-size="15" fill="#E2E8F0">model(prompt)</text>
+  <text x="378" y="234" font-size="12" fill="#94A3B8">your bound function</text>
+
+  <!-- response cache -->
+  <rect x="362" y="300" width="176" height="64" rx="8" fill="#111C2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="378" y="327" font-size="15" fill="#E2E8F0">Response cache</text>
+  <text x="378" y="346" font-size="12" fill="#94A3B8">hit skips the model</text>
+
+  <!-- checks -->
+  <rect x="600" y="222" width="190" height="58" rx="8" fill="#111C2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="616" y="247" font-size="15" fill="#E2E8F0">Checks</text>
+  <text x="616" y="266" font-size="12" fill="#94A3B8">contains, matches, json</text>
+
+  <!-- judge (optional, dashed) -->
+  <rect x="600" y="306" width="190" height="58" rx="8" fill="#111C2E" stroke="#1E3A5F" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="616" y="331" font-size="15" fill="#E2E8F0">LLM judge</text>
+  <text x="616" y="350" font-size="12" fill="#94A3B8">optional, scores 0 to 1</text>
+
+  <!-- REPORT zone -->
+  <rect x="930" y="128" width="210" height="300" rx="12" fill="#0E1A2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="954" y="160" font-size="14" fill="#64748B">REPORT</text>
+
+  <rect x="954" y="240" width="170" height="82" rx="8" fill="#111C2E" stroke="#1E3A5F" stroke-width="1.5"/>
+  <text x="970" y="268" font-size="15" fill="#E2E8F0">EvalReport</text>
+  <text x="970" y="289" font-size="12" fill="#94A3B8">passRate, errorCount</text>
+  <text x="970" y="307" font-size="12" fill="#94A3B8">scores, cache hits</text>
+
+  <rect x="954" y="338" width="170" height="52" rx="8" fill="#0B1220" stroke="#1E3A5F" stroke-width="1.2"/>
+  <text x="970" y="360" font-size="12" fill="#64748B">toMarkdown()</text>
+  <text x="970" y="379" font-size="12" fill="#64748B">toJson()</text>
+
+  <!-- arrows -->
+  <!-- suite.run -> cache -->
+  <path d="M274 328 L356 332" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arw)"/>
+  <!-- cache -> model (miss) -->
+  <path d="M450 300 L450 250" stroke="#64748B" stroke-width="1.8" fill="none" marker-end="url(#arwd)"/>
+  <text x="462" y="278" font-size="11.5" fill="#64748B">miss, then store</text>
+  <!-- cache -> checks -->
+  <path d="M538 328 L596 253" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arw)"/>
+  <!-- cache -> judge -->
+  <path d="M538 336 L596 335" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arw)"/>
+  <!-- checks -> report -->
+  <path d="M790 251 L950 272" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arw)"/>
+  <!-- judge -> report -->
+  <path d="M790 335 L950 300" stroke="#38BDF8" stroke-width="2" fill="none" marker-end="url(#arw)"/>
+
+  <!-- caption -->
+  <text x="48" y="452" font-size="13" fill="#64748B">Commit the cache directory and the CI eval job is deterministic, offline, and free.</text>
+</svg>
