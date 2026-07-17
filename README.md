@@ -1,5 +1,7 @@
 # llm_eval
 
+![llm_eval banner](doc/banner.png)
+
 A test harness for LLM outputs in Dart. Write eval cases the way you write
 unit tests: a prompt, a list of checks, and a report you can read in CI.
 
