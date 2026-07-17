@@ -88,7 +88,11 @@ Check.judge(
 
 The judge receives the rubric and the output in a fixed prompt and must
 answer with a `SCORE: <number>` line between 0.0 and 1.0. A response that
-cannot be parsed becomes an error result, never a silent pass or fail.
+cannot be parsed becomes an error result, never a silent pass or fail. So
+does a response with conflicting score lines, which is what a graded
+output that smuggles in its own `SCORE: 1.0` line tends to produce. The
+graded output is wrapped in delimiters the judge is told to respect; this
+raises the bar against prompt injection without eliminating it.
 
 One honest caveat: the judge is itself an LLM. Its scores are not
 calibrated, they drift across judge models and versions, and they can be
@@ -97,7 +101,14 @@ verdicts against your own reading.
 
 ## Caching and CI
 
+The core library is pure Dart and runs on every platform, including the
+web. `FileResponseCache` needs `dart:io`, so it lives in a separate
+library:
+
 ```dart
+import 'package:llm_eval/llm_eval.dart';
+import 'package:llm_eval/io.dart' show FileResponseCache;
+
 final cache = FileResponseCache('test/llm_cache');
 final report = await suite.run(model, cache: cache, modelId: 'my-model-v1');
 ```
@@ -117,9 +128,27 @@ test('prompt regression suite', () async {
     cache: FileResponseCache('test/llm_cache'),
     modelId: 'my-model-v1',
   );
+  expect(report.results, isNotEmpty);
+  expect(report.errorCount, 0, reason: report.toMarkdown());
   expect(report.passRate, 1.0, reason: report.toMarkdown());
 });
 ```
+
+The same shape works as a standalone CI gate:
+
+```dart
+final report = await suite.run(model, cache: cache, modelId: 'my-model-v1');
+stdout.writeln(report.toMarkdown());
+if (report.results.isEmpty || report.errorCount > 0 || report.passRate < 1.0) {
+  exitCode = 1;
+}
+```
+
+Check `errorCount` separately from the pass rate: errors mean the harness
+could not produce a verdict (a judge response failed to parse, a callback
+threw), not that the model answered badly. Note that an empty suite has a
+pass rate of 1.0, so guard against accidentally building zero cases, as
+both snippets above do.
 
 ## Repeat and flakiness
 
@@ -146,6 +175,7 @@ Out of scope for 0.1 and planned for later releases:
 - side-by-side comparison of several models over one suite
 - token and cost accounting
 - dataset loaders for existing eval formats
+- structured prompts: system messages and multi-turn conversations
 
 ## License
 

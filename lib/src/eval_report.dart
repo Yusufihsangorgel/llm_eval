@@ -31,13 +31,14 @@ class AttemptResult {
 
   /// Time spent obtaining the output (model call or cache read).
   ///
-  /// Check evaluation time is not included.
+  /// Cache write time and check evaluation time are not included.
   final Duration latency;
 
   /// Whether the output came from the response cache.
   final bool fromCache;
 
-  /// The error thrown by the model call, or null when the call succeeded.
+  /// The error thrown by the model call or the cache write, or null when
+  /// the output was obtained (and, with a cache, stored) successfully.
   final String? modelError;
 
   /// Whether the model call succeeded and every check passed.
@@ -97,6 +98,13 @@ class EvalReport {
   /// The number of flaky cases; see [CaseResult.isFlaky].
   int get flakyCount => results.where((r) => r.isFlaky).length;
 
+  /// The number of cases with a model error or an errored check; see
+  /// [CaseResult.hasError].
+  ///
+  /// Errors mean the harness could not produce a verdict, so treat any
+  /// nonzero value as a failed run in CI.
+  int get errorCount => results.where((r) => r.hasError).length;
+
   /// The fraction of cases that passed, between 0.0 and 1.0.
   ///
   /// A case counts as passed only when every attempt passed, so a flaky
@@ -139,6 +147,7 @@ class EvalReport {
           'id': r.caseId,
           'passed': r.passed,
           'flaky': r.isFlaky,
+          'hasError': r.hasError,
           'attempts': [
             for (final a in r.attempts)
               {

@@ -116,6 +116,7 @@ void main() {
       expect(attempt.checks[0].result.passed, isTrue);
       expect(attempt.checks[1].result.isError, isTrue);
       expect(attempt.checks[1].result.error, contains('bad check'));
+      expect(attempt.checks[1].result.error, contains('stack:'));
       expect(attempt.passed, isFalse);
       expect(attempt.hasError, isTrue);
     });

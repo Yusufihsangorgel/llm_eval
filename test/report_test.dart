@@ -214,6 +214,12 @@ Output:
       expect(markdown, isNot(contains('| case |')));
       expect(report.passRate, 1.0);
       expect(report.flakinessRate, 0.0);
+      expect(report.errorCount, 0);
+    });
+
+    test('errorCount counts cases with errors, not plain fails', () {
+      expect(mixedReport().errorCount, 1);
+      expect(flakyReport().errorCount, 0);
     });
   });
 
@@ -232,6 +238,7 @@ Output:
             'id': 'greeting',
             'passed': true,
             'flaky': false,
+            'hasError': false,
             'attempts': [
               {
                 'output': 'Hello there!',
@@ -262,6 +269,7 @@ Output:
             'id': 'json',
             'passed': false,
             'flaky': false,
+            'hasError': false,
             'attempts': [
               {
                 'output': 'not json',
@@ -285,6 +293,7 @@ Output:
             'id': 'broken',
             'passed': false,
             'flaky': false,
+            'hasError': true,
             'attempts': [
               {
                 'output': '',
@@ -305,6 +314,7 @@ Output:
           '{"modelId":null,"repeat":2,"caseCount":1,"passedCount":0,'
           '"passRate":0.0,"flakyCount":1,"flakinessRate":1.0,'
           '"cases":[{"id":"flaky-case","passed":false,"flaky":true,'
+          '"hasError":false,'
           '"attempts":[{"output":"yes","passed":true,"latencyMs":10,'
           '"fromCache":false,"modelError":null,'
           '"checks":[{"description":"contains \\"yes\\"","passed":true,'

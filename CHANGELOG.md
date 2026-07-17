@@ -7,7 +7,8 @@ Initial release.
 - `EvalCase`, `EvalSuite`, and `EvalReport` with Markdown and JSON output.
 - Built-in checks: `contains`, `notContains`, `matches`, `isValidJson`,
   `predicate`, and LLM-as-judge scoring with `Check.judge`.
-- `ResponseCache` interface and `FileResponseCache` for deterministic
-  reruns in CI.
+- `ResponseCache` interface in the core and a file-backed
+  `FileResponseCache` in `package:llm_eval/io.dart` (atomic writes) for
+  deterministic reruns in CI.
 - Concurrent case execution with stable result order.
 - Repeat runs with a flakiness rate.
