@@ -1,6 +1,6 @@
 # llm_eval
 
-![llm_eval banner](doc/banner.png)
+![llm_eval banner](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/banner.png)
 
 A test harness for LLM outputs in Dart. Write eval cases the way you write
 unit tests: a prompt, a list of checks, and a report you can read in CI.
@@ -13,9 +13,10 @@ cases concurrently, checking outputs, caching responses, and reporting.
 
 Dart and Flutter apps that call LLMs usually have no automated way to catch
 a prompt regression. Model output is not exact, so plain string equality in
-a unit test does not work. This package covers the middle ground: assertion
-style checks for the properties that must hold, an optional LLM judge for
-the fuzzy parts, and a response cache so CI runs are deterministic and free.
+a unit test does not work. This package covers the middle ground. It gives
+you assertion-style checks for the properties that must hold. For the fuzzy
+parts, there is an optional LLM judge. A response cache keeps CI runs
+deterministic and free.
 
 ## Quick start
 
