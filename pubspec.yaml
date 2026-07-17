@@ -1,0 +1,20 @@
+name: llm_eval
+description: "Test harness for LLM outputs: assertion checks, LLM-as-judge scoring, response caching, and CI-friendly reports."
+version: 0.1.0
+repository: https://github.com/Yusufihsangorgel/llm_eval
+topics:
+  - llm
+  - ai
+  - testing
+  - evaluation
+  - ci
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  crypto: ^3.0.6
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0
