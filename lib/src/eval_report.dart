@@ -172,6 +172,149 @@ class EvalReport {
     ],
   };
 
+  /// Renders the report as a JUnit XML document, the format CI systems read
+  /// to show test results in their own UI.
+  ///
+  /// Write it where your CI expects test reports (GitHub Actions, GitLab,
+  /// Jenkins, CircleCI and Buildkite all consume this) and each eval case
+  /// shows up as a test, with failing ones expanded to the checks that failed
+  /// and the model output that failed them:
+  ///
+  /// ```dart
+  /// File('eval-results.xml').writeAsStringSync(report.toJUnitXml());
+  /// ```
+  ///
+  /// A case with a model error or an errored check becomes an `<error>`, any
+  /// other non-passing case a `<failure>`, and a flaky case counts as failing
+  /// because [CaseResult.passed] requires every attempt to pass. Times are the
+  /// summed attempt latencies in seconds.
+  ///
+  /// Model output is arbitrary text, so it is XML-escaped and characters that
+  /// XML 1.0 does not allow at all are dropped rather than smuggled through;
+  /// one stray control byte would otherwise make a parser reject the whole
+  /// document.
+  String toJUnitXml() {
+    final suite = modelId ?? 'llm_eval';
+    // A test case is an error or a failure, never both, so classify once.
+    final errors = results.where((r) => r.hasError).length;
+    final failures = results.where((r) => !r.hasError && !r.passed).length;
+    final total = results.fold<double>(0, (sum, r) => sum + _seconds(r));
+
+    final b = StringBuffer()
+      ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
+      ..writeln(
+        '<testsuites name="llm_eval" tests="${results.length}" '
+        'failures="$failures" errors="$errors" '
+        'time="${total.toStringAsFixed(3)}">',
+      )
+      ..writeln(
+        '  <testsuite name="${_xml(suite)}" tests="${results.length}" '
+        'failures="$failures" errors="$errors" '
+        'time="${total.toStringAsFixed(3)}">',
+      );
+
+    for (final r in results) {
+      final head =
+          '    <testcase name="${_xml(r.caseId)}" '
+          'classname="${_xml(suite)}" '
+          'time="${_seconds(r).toStringAsFixed(3)}"';
+      if (r.passed) {
+        b.writeln('$head/>');
+        continue;
+      }
+      final tag = r.hasError ? 'error' : 'failure';
+      b
+        ..writeln('$head>')
+        ..writeln('      <$tag message="${_xml(_shortReason(r))}">')
+        ..writeln(_xml(_caseDetails(r)))
+        ..writeln('      </$tag>')
+        ..writeln('    </testcase>');
+    }
+
+    b
+      ..writeln('  </testsuite>')
+      ..writeln('</testsuites>');
+    return b.toString();
+  }
+
+  static double _seconds(CaseResult r) =>
+      r.attempts.fold<int>(0, (sum, a) => sum + a.latency.inMicroseconds) /
+      1000000;
+
+  /// The one-line reason shown in the CI UI next to the case name.
+  static String _shortReason(CaseResult r) {
+    for (final a in r.attempts) {
+      if (a.modelError != null) return 'model error: ${a.modelError}';
+      for (final c in a.checks) {
+        if (c.result.isError) {
+          return 'check errored: ${c.description}: ${c.result.error}';
+        }
+      }
+    }
+    final failed = r.attempts
+        .expand((a) => a.checks)
+        .where((c) => !c.result.passed)
+        .map((c) => c.description)
+        .toSet();
+    if (r.isFlaky) {
+      final passed = r.attempts.where((a) => a.passed).length;
+      return 'flaky: $passed of ${r.attempts.length} attempts passed '
+          '(${failed.join(', ')})';
+    }
+    return failed.isEmpty ? 'case did not pass' : 'failed: ${failed.join(', ')}';
+  }
+
+  /// The body of the failure element: what failed, and what the model said.
+  static String _caseDetails(CaseResult r) {
+    final b = StringBuffer();
+    for (var i = 0; i < r.attempts.length; i++) {
+      final a = r.attempts[i];
+      if (r.attempts.length > 1) b.writeln('attempt ${i + 1}:');
+      if (a.modelError != null) {
+        b.writeln('  model error: ${a.modelError}');
+        continue;
+      }
+      for (final c in a.checks) {
+        if (c.result.passed && !c.result.isError) continue;
+        b.writeln('  ${c.result.isError ? 'error' : 'failed'}: ${c.description}');
+        if (c.result.detail.isNotEmpty) b.writeln('    ${c.result.detail}');
+        if (c.result.error != null) b.writeln('    ${c.result.error}');
+      }
+      b.writeln('  output: ${a.output}');
+    }
+    return b.toString();
+  }
+
+  /// Escapes [s] for XML and drops characters XML 1.0 does not permit.
+  static String _xml(String s) {
+    final b = StringBuffer();
+    for (final rune in s.runes) {
+      final allowed =
+          rune == 0x9 ||
+          rune == 0xA ||
+          rune == 0xD ||
+          (rune >= 0x20 && rune <= 0xD7FF) ||
+          (rune >= 0xE000 && rune <= 0xFFFD) ||
+          (rune >= 0x10000 && rune <= 0x10FFFF);
+      if (!allowed) continue;
+      switch (rune) {
+        case 0x26:
+          b.write('&amp;');
+        case 0x3C:
+          b.write('&lt;');
+        case 0x3E:
+          b.write('&gt;');
+        case 0x22:
+          b.write('&quot;');
+        case 0x27:
+          b.write('&apos;');
+        default:
+          b.writeCharCode(rune);
+      }
+    }
+    return b.toString();
+  }
+
   /// Renders the report as Markdown, suitable for a CI job summary.
   ///
   /// The summary table describes the first attempt of each case; the

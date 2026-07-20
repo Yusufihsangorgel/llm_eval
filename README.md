@@ -155,6 +155,34 @@ threw), not that the model answered badly. Note that an empty suite has a
 pass rate of 1.0, so guard against accidentally building zero cases, as
 both snippets above do.
 
+### Showing results in the CI UI
+
+An exit code tells the build to go red; `toJUnitXml` tells it which cases
+went red and why. Write the report where your CI looks for test results and
+each eval case appears as a test, failing ones expanded to the checks that
+failed and the model output that failed them:
+
+```dart
+File('eval-results.xml').writeAsStringSync(report.toJUnitXml());
+```
+
+```yaml
+# GitHub Actions
+- run: dart run tool/eval.dart
+- uses: dorny/test-reporter@v1
+  if: always()
+  with:
+    path: eval-results.xml
+    reporter: java-junit
+```
+
+GitLab, Jenkins, CircleCI and Buildkite read the same format. A case with a
+model error or an errored check becomes an `<error>`, any other non-passing
+case a `<failure>`, and a flaky case counts as failing with a message saying
+how many attempts passed. Model output is arbitrary text, so it is escaped
+and characters XML cannot carry are dropped; a single stray control byte
+would otherwise make the report unreadable to the CI system.
+
 ## Repeat and flakiness
 
 ```dart

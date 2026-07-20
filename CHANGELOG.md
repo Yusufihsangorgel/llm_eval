@@ -1,3 +1,16 @@
+## 0.2.0
+
+- Add `EvalReport.toJUnitXml()`. The exit-code gate added in 0.1.3 turns a
+  build red; this makes the CI system show which cases went red and why. Each
+  eval case becomes a `<testcase>`, a model error or errored check becomes an
+  `<error>`, any other non-passing case a `<failure>` carrying the checks that
+  failed and the model output that failed them, and a flaky case reports how
+  many attempts passed. GitHub Actions, GitLab, Jenkins, CircleCI and
+  Buildkite all read this format. Model output is arbitrary text, so it is
+  XML-escaped and characters XML 1.0 does not permit are dropped rather than
+  emitted; one stray control byte would otherwise make a parser reject the
+  whole report.
+
 ## 0.1.3
 
 - Example: use the suite as a CI gate. It now exits non-zero when any case
