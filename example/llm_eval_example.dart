@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:llm_eval/llm_eval.dart';
 
 /// A stand-in model with canned answers.
@@ -42,4 +44,10 @@ Future<void> main() async {
 
   final report = await suite.run(fakeModel, modelId: 'fake-model');
   print(report.toMarkdown());
+
+  // Use it as a CI gate: exit non-zero when any case fails, so a regression in
+  // the model's answers turns the build red instead of slipping through.
+  final failed = report.results.where((r) => !r.passed).length;
+  print('\n${report.passedCount}/${report.results.length} cases passed');
+  exitCode = failed == 0 ? 0 : 1;
 }

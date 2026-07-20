@@ -1,3 +1,9 @@
+## 0.1.3
+
+- Example: use the suite as a CI gate. It now exits non-zero when any case
+  fails, the way you wire it into a build step, instead of only printing a
+  report.
+
 ## 0.1.2
 
 - Docs: sharpen the pub.dev description to lead with the value and the terms people search.
