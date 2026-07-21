@@ -2,7 +2,7 @@ name: llm_eval
 description: >-
   A Dart test harness for LLM evals: assertion checks over model outputs, an
   optional LLM-as-judge, and cached responses so CI stays deterministic.
-version: 0.2.2
+version: 0.3.0
 repository: https://github.com/Yusufihsangorgel/llm_eval
 topics:
   - llm

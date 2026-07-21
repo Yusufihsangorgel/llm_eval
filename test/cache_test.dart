@@ -237,4 +237,103 @@ void main() {
       }
     });
   });
+
+  group('ResponseCache.wrap', () {
+    test('a warm cache does not re-invoke a wrapped judge', () async {
+      var judgeCalls = 0;
+      Future<String> judge(String prompt) async {
+        judgeCalls++;
+        return 'SCORE: 1.0';
+      }
+
+      final cache = MemoryCache();
+      final suite = EvalSuite([
+        EvalCase(
+          id: 'a',
+          prompt: 'p1',
+          checks: [
+            Check.judge(
+              judge: cache.wrap(judge, modelId: 'judge-v1'),
+              rubric: 'anything',
+            ),
+          ],
+        ),
+      ]);
+
+      final first = await suite.run(
+        (prompt) async => 'model output',
+        cache: cache,
+        modelId: 'm1',
+      );
+      expect(judgeCalls, 1);
+      expect(first.passRate, 1.0);
+      expect(first.results.single.attempts.single.fromCache, isFalse);
+
+      judgeCalls = 0;
+      final second = await suite.run(
+        (prompt) async => 'model output',
+        cache: cache,
+        modelId: 'm1',
+      );
+      expect(
+        judgeCalls,
+        0,
+        reason: 'a warm cache must not call the wrapped judge again',
+      );
+      expect(second.passRate, 1.0);
+      expect(second.results.single.attempts.single.fromCache, isTrue);
+    });
+
+    test('an unwrapped judge still fires on a warm cache', () async {
+      // Documents the gap wrap closes: the suite caches the model under
+      // test but not a nested judge, so a raw judge runs every time.
+      var judgeCalls = 0;
+      Future<String> judge(String prompt) async {
+        judgeCalls++;
+        return 'SCORE: 1.0';
+      }
+
+      final cache = MemoryCache();
+      final suite = EvalSuite([
+        EvalCase(
+          id: 'a',
+          prompt: 'p1',
+          checks: [Check.judge(judge: judge, rubric: 'anything')],
+        ),
+      ]);
+
+      await suite.run(
+        (prompt) async => 'model output',
+        cache: cache,
+        modelId: 'm1',
+      );
+      final second = await suite.run(
+        (prompt) async => 'model output',
+        cache: cache,
+        modelId: 'm1',
+      );
+      expect(second.results.single.attempts.single.fromCache, isTrue);
+      expect(judgeCalls, 2, reason: 'the raw judge is not cached');
+    });
+
+    test('wrap keys match the scheme the suite uses', () async {
+      final cache = MemoryCache();
+      final judge = cache.wrap((prompt) async => 'SCORE: 1.0', modelId: 'j1');
+      await judge('hello');
+      expect(cache.entries.keys.single, '2:j1\nhello');
+    });
+
+    test('a wrapped call falls through to the model on a read failure',
+        () async {
+      var calls = 0;
+      final cache = BrokenReadCache();
+      final call = cache.wrap((prompt) async {
+        calls++;
+        return 'graded';
+      }, modelId: 'j1');
+      expect(await call('x'), 'graded');
+      expect(calls, 1, reason: 'a broken read is treated as a miss');
+      expect(cache.writes, 1);
+    });
+  });
 }

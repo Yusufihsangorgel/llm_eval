@@ -34,7 +34,14 @@ class AttemptResult {
   /// Cache write time and check evaluation time are not included.
   final Duration latency;
 
-  /// Whether the output came from the response cache.
+  /// Whether the model-under-test output came from the response cache.
+  ///
+  /// This reflects only the call `EvalSuite.run` makes. A nested model
+  /// call, such as the judge in a `Check.judge`, runs inside a check and
+  /// has its own cache path through `ResponseCache.wrap`; it is not folded
+  /// in here. So a cached attempt whose judge was left unwrapped still
+  /// called the judge, and the Markdown report's `cached` column describes
+  /// the model under test, not any nested judge.
   final bool fromCache;
 
   /// The error thrown by the model call or the cache write, or null when

@@ -1,3 +1,14 @@
+## 0.3.0
+
+- Add `ResponseCache.wrap`, a caching wrapper for a nested `ModelCall`.
+  `EvalSuite.run` caches the model under test but never the judge in a
+  `Check.judge`, so a warm cache used to skip the model and still call the
+  judge on every run, breaking the deterministic and free promise while the
+  report labeled the case cached. Wrap the judge with
+  `cache.wrap(judgeModel, modelId: 'judge-v1')` and it caches under the same
+  key scheme the suite uses. Also documented that `fromCache` and the report's
+  `cached` column describe the model under test, not any nested judge.
+
 ## 0.2.2
 
 - Shorten the screenshot description. pub.dev accepts up to 200 characters but

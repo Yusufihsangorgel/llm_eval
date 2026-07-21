@@ -104,6 +104,22 @@ calibrated, they drift across judge models and versions, and they can be
 wrong. Use judges sparingly, pin the judge model, and spot-check its
 verdicts against your own reading.
 
+The judge is a nested model call that `suite.run` does not cache: on a warm
+cache the model under test is skipped but an unwrapped judge fires on every
+run. Wrap the judge in the same cache so it is cached too:
+
+```dart
+Check.judge(
+  judge: cache.wrap(judgeModel, modelId: 'judge-v1'),
+  rubric: 'The answer names Paris and stays under three sentences.',
+)
+```
+
+`cache.wrap` uses the same key scheme as the suite, so the judge's
+responses sit alongside the model responses in one cache directory. Give
+each judge its own `modelId` so pinning or changing a judge re-records only
+its own responses.
+
 ## Caching and CI
 
 The core library is pure Dart and runs on every platform, including the
@@ -123,6 +139,12 @@ after the SHA-256 of the model id and prompt. Later runs read the cache and
 never call the model. Commit the cache directory and your CI eval job is
 deterministic, offline, and free. Delete the directory, or change
 `modelId`, to re-record.
+
+The cache covers the model under test. A nested call, such as the judge in
+a `Check.judge`, is not cached by `suite.run`, so a warm cache still calls
+the judge unless you wrap it with `cache.wrap(judgeModel, modelId: ...)`
+(see [LLM as judge](#llm-as-judge)). The Markdown report's `cached` column
+likewise describes the model under test, not any nested judge.
 
 A regression test then looks like any other test:
 
