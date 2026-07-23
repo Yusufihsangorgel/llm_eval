@@ -3,33 +3,30 @@ import 'package:test/test.dart';
 import 'package:xml/xml.dart';
 
 CheckOutcome _pass(String description) => CheckOutcome(
-      description: description,
-      result: const CheckResult.pass(detail: 'ok'),
-    );
+  description: description,
+  result: const CheckResult.pass(detail: 'ok'),
+);
 
 CheckOutcome _fail(String description, String detail) => CheckOutcome(
-      description: description,
-      result: CheckResult.fail(detail: detail),
-    );
+  description: description,
+  result: CheckResult.fail(detail: detail),
+);
 
-CheckOutcome _errored(String description, String error) => CheckOutcome(
-      description: description,
-      result: CheckResult.error(error),
-    );
+CheckOutcome _errored(String description, String error) =>
+    CheckOutcome(description: description, result: CheckResult.error(error));
 
 AttemptResult _attempt({
   String output = 'out',
   List<CheckOutcome> checks = const [],
   String? modelError,
   int ms = 10,
-}) =>
-    AttemptResult(
-      output: output,
-      checks: checks,
-      latency: Duration(milliseconds: ms),
-      fromCache: false,
-      modelError: modelError,
-    );
+}) => AttemptResult(
+  output: output,
+  checks: checks,
+  latency: Duration(milliseconds: ms),
+  fromCache: false,
+  modelError: modelError,
+);
 
 void main() {
   test('a passing report parses and every case is a bare testcase', () {
@@ -125,8 +122,10 @@ void main() {
       ],
     );
     final document = XmlDocument.parse(report.toJUnitXml());
-    expect(document.findAllElements('error').single.getAttribute('message'),
-        contains('threw StateError'));
+    expect(
+      document.findAllElements('error').single.getAttribute('message'),
+      contains('threw StateError'),
+    );
   });
 
   test('a flaky case fails and says how many attempts passed', () {
@@ -193,11 +192,18 @@ void main() {
   test('without a modelId the suite falls back to the package name', () {
     final report = EvalReport(
       results: [
-        CaseResult(caseId: 'a', attempts: [_attempt(checks: [_pass('ok')])]),
+        CaseResult(
+          caseId: 'a',
+          attempts: [
+            _attempt(checks: [_pass('ok')]),
+          ],
+        ),
       ],
     );
     final document = XmlDocument.parse(report.toJUnitXml());
-    expect(document.findAllElements('testsuite').single.getAttribute('name'),
-        'llm_eval');
+    expect(
+      document.findAllElements('testsuite').single.getAttribute('name'),
+      'llm_eval',
+    );
   });
 }

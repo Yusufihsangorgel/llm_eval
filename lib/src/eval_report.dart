@@ -268,7 +268,9 @@ class EvalReport {
       return 'flaky: $passed of ${r.attempts.length} attempts passed '
           '(${failed.join(', ')})';
     }
-    return failed.isEmpty ? 'case did not pass' : 'failed: ${failed.join(', ')}';
+    return failed.isEmpty
+        ? 'case did not pass'
+        : 'failed: ${failed.join(', ')}';
   }
 
   /// The body of the failure element: what failed, and what the model said.
@@ -283,7 +285,9 @@ class EvalReport {
       }
       for (final c in a.checks) {
         if (c.result.passed && !c.result.isError) continue;
-        b.writeln('  ${c.result.isError ? 'error' : 'failed'}: ${c.description}');
+        b.writeln(
+          '  ${c.result.isError ? 'error' : 'failed'}: ${c.description}',
+        );
         if (c.result.detail.isNotEmpty) b.writeln('    ${c.result.detail}');
         if (c.result.error != null) b.writeln('    ${c.result.error}');
       }

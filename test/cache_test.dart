@@ -323,17 +323,19 @@ void main() {
       expect(cache.entries.keys.single, '2:j1\nhello');
     });
 
-    test('a wrapped call falls through to the model on a read failure',
-        () async {
-      var calls = 0;
-      final cache = BrokenReadCache();
-      final call = cache.wrap((prompt) async {
-        calls++;
-        return 'graded';
-      }, modelId: 'j1');
-      expect(await call('x'), 'graded');
-      expect(calls, 1, reason: 'a broken read is treated as a miss');
-      expect(cache.writes, 1);
-    });
+    test(
+      'a wrapped call falls through to the model on a read failure',
+      () async {
+        var calls = 0;
+        final cache = BrokenReadCache();
+        final call = cache.wrap((prompt) async {
+          calls++;
+          return 'graded';
+        }, modelId: 'j1');
+        expect(await call('x'), 'graded');
+        expect(calls, 1, reason: 'a broken read is treated as a miss');
+        expect(cache.writes, 1);
+      },
+    );
   });
 }
