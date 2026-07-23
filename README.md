@@ -65,7 +65,7 @@ Run the bundled example with `dart run example/llm_eval_example.dart`.
 | `Check.contains(s)` | the output contains `s` (case-insensitive by default) |
 | `Check.notContains(s)` | the output does not contain `s` |
 | `Check.matches(regExp)` | the pattern matches the output |
-| `Check.isValidJson(where: f)` | the output parses as JSON and the optional condition holds |
+| `Check.isValidJson(where: f)` | the output parses as JSON (stripping a single wrapping markdown code fence first, if the raw output does not parse) and the optional condition holds |
 | `Check.predicate(desc, f)` | your function returns true |
 | `Check.judge(...)` | another model scores the output at or above `passAt` |
 

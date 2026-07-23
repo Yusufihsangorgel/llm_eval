@@ -128,6 +128,65 @@ void main() {
       expect(result.isError, isTrue);
       expect(result.error, contains('bad callback'));
     });
+
+    test('passes on JSON wrapped in a ```json fence', () async {
+      final result = await Check.isValidJson().evaluate(
+        '```json\n{"a": 1}\n```',
+      );
+      expect(result.passed, isTrue);
+      expect(result.isError, isFalse);
+    });
+
+    test('passes on JSON wrapped in a plain ``` fence', () async {
+      final result = await Check.isValidJson().evaluate('```\n{"a": 1}\n```');
+      expect(result.passed, isTrue);
+    });
+
+    test('passes on a fenced block followed by trailing prose', () async {
+      // The common real-world shape: a chat model answers with a fenced
+      // JSON block, then adds a sentence of prose after the closing fence.
+      final result =
+          await Check.isValidJson(
+            where: (v) => v is Map && v['city'] == 'Paris',
+          ).evaluate(
+            '```json\n{\n  "city": "Paris"\n}\n```\n\nThis is the capital of France.',
+          );
+      expect(result.passed, isTrue);
+      expect(result.isError, isFalse);
+    });
+
+    test(
+      'the where callback receives the value decoded from the fence',
+      () async {
+        final check = Check.isValidJson(
+          where: (decoded) => decoded is Map && decoded['a'] == 2,
+        );
+        final result = await check.evaluate('```json\n{"a": 1}\n```');
+        expect(result.passed, isFalse);
+        expect(result.isError, isFalse);
+      },
+    );
+
+    test(
+      'fails when neither the raw output nor a fenced block parses',
+      () async {
+        final result = await Check.isValidJson().evaluate(
+          '```json\nnot json\n```',
+        );
+        expect(result.passed, isFalse);
+        expect(result.isError, isFalse);
+        expect(result.detail, contains('not valid JSON'));
+      },
+    );
+
+    test('fails on plain non-JSON prose with no fence at all', () async {
+      final result = await Check.isValidJson().evaluate(
+        'Sure, the capital of France is Paris.',
+      );
+      expect(result.passed, isFalse);
+      expect(result.isError, isFalse);
+      expect(result.detail, contains('not valid JSON'));
+    });
   });
 
   group('Check.predicate', () {

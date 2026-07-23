@@ -39,9 +39,15 @@ abstract interface class Check {
 
   /// A check that passes when the output parses as JSON.
   ///
+  /// The raw output is tried first. If that fails, a single leading or
+  /// trailing markdown code fence (three backticks, optionally tagged
+  /// `json`) is stripped and the inner content is tried instead, since
+  /// chat-tuned models commonly wrap a JSON answer in one even when not
+  /// asked to. Output that still does not parse is a fail.
+  ///
   /// When [where] is given it receives the decoded value and must return
-  /// true for the check to pass. Output that does not parse is a fail. A
-  /// [where] callback that throws produces an error result, not a fail.
+  /// true for the check to pass. A [where] callback that throws produces
+  /// an error result, not a fail.
   factory Check.isValidJson({bool Function(Object? decoded)? where}) =>
       _IsValidJsonCheck(where);
 
@@ -142,6 +148,18 @@ class _IsValidJsonCheck implements Check {
 
   final bool Function(Object? decoded)? _where;
 
+  /// Matches a single markdown-fenced code block and captures its
+  /// contents.
+  ///
+  /// Chat-tuned models often wrap a JSON answer in a fenced code block
+  /// (three backticks, optionally followed by "json") unless the caller
+  /// forces a JSON-only response mode. This is the fallback tried when the
+  /// raw output does not parse as JSON on its own.
+  static final RegExp _fencedBlock = RegExp(
+    r'```(?:json)?\s*\n?(.*?)\n?```',
+    dotAll: true,
+  );
+
   @override
   String get description =>
       _where == null ? 'is valid JSON' : 'is valid JSON matching a condition';
@@ -149,13 +167,26 @@ class _IsValidJsonCheck implements Check {
   @override
   CheckResult evaluate(String output) {
     Object? decoded;
+    var viaFence = false;
     try {
       decoded = jsonDecode(output);
     } on FormatException catch (e) {
-      return CheckResult.fail(detail: 'not valid JSON: ${e.message}');
+      final match = _fencedBlock.firstMatch(output);
+      if (match == null) {
+        return CheckResult.fail(detail: 'not valid JSON: ${e.message}');
+      }
+      try {
+        decoded = jsonDecode(match.group(1)!.trim());
+        viaFence = true;
+      } on FormatException catch (e2) {
+        return CheckResult.fail(detail: 'not valid JSON: ${e2.message}');
+      }
     }
+    final passDetail = viaFence
+        ? 'parsed after stripping a markdown code fence'
+        : '';
     final where = _where;
-    if (where == null) return const CheckResult.pass();
+    if (where == null) return CheckResult.pass(detail: passDetail);
     bool ok;
     try {
       ok = where(decoded);
@@ -164,7 +195,7 @@ class _IsValidJsonCheck implements Check {
         describeError('isValidJson where callback threw', e, stackTrace),
       );
     }
-    if (ok) return const CheckResult.pass();
+    if (ok) return CheckResult.pass(detail: passDetail);
     return const CheckResult.fail(
       detail: 'JSON parsed but the where condition returned false',
     );

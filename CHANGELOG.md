@@ -1,3 +1,12 @@
+## 0.3.1
+
+- `Check.isValidJson` now strips a single wrapping markdown code fence before
+  giving up. Chat-tuned models commonly answer a JSON prompt with the answer
+  wrapped in a code fence (optionally tagged `json`) unless the caller forces
+  a JSON-only response mode, and the raw `jsonDecode` call was failing on
+  exactly that output, reporting a fail on a correct answer instead of a
+  pass.
+
 ## 0.3.0
 
 - Add `ResponseCache.wrap`, a caching wrapper for a nested `ModelCall`.
