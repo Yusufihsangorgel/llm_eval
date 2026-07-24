@@ -15,7 +15,7 @@ import 'response_cache.dart';
 /// Writes are atomic: each response goes to a temporary file first and is
 /// then moved into place with a rename, so a concurrent reader (including
 /// one in another process) never observes a partially written response.
-class FileResponseCache implements ResponseCache {
+final class FileResponseCache implements ResponseCache {
   /// Creates a cache rooted at [directory].
   FileResponseCache(String directory) : _directory = Directory(directory);
 

@@ -1,3 +1,23 @@
+## 0.4.0
+
+Freeze hygiene ahead of 1.0.0. No behaviour changes; both items are about what
+the package promises rather than what it does.
+
+- **The barrel files now name what they export.** `llm_eval.dart` and `io.dart`
+  re-exported whole source files, which meant every public name in them was
+  API by accident, and any name added later would have become API silently.
+  They now list exactly what they export. The exported set is unchanged —
+  including the `NestedModelCallCaching` extension on `ResponseCache`, which
+  the first draft of this change would have dropped and which the tests caught.
+- **The value types are `final`.** `AttemptResult`, `CaseResult`,
+  `CheckOutcome`, `EvalReport`, `EvalSuite`, `EvalCase`, `CheckResult` and
+  `FileResponseCache` carried no class modifier, so freezing them would have
+  made every future parameter a breaking change for anyone who had subclassed
+  them. Nothing in the package, its tests or its example subtypes any of them.
+  `Check` stays an `abstract interface class`: implementing it is how callers
+  add their own checks, and `ResponseCache` stays implementable for the same
+  reason.
+
 ## 0.3.1
 
 - `Check.isValidJson` now strips a single wrapping markdown code fence before

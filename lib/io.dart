@@ -10,4 +10,4 @@
 /// ```
 library;
 
-export 'src/file_response_cache.dart';
+export 'src/file_response_cache.dart' show FileResponseCache;

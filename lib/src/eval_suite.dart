@@ -6,7 +6,7 @@ import 'model_call.dart';
 import 'response_cache.dart';
 
 /// A collection of [EvalCase]s that run together against one model.
-class EvalSuite {
+final class EvalSuite {
   /// Creates a suite over [cases].
   EvalSuite(this.cases);
 

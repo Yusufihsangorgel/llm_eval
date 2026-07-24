@@ -1,7 +1,7 @@
 import 'check.dart';
 
 /// A single prompt together with the checks its output must satisfy.
-class EvalCase {
+final class EvalCase {
   /// Creates a case.
   EvalCase({
     required this.id,

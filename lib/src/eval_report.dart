@@ -1,7 +1,7 @@
 import 'check_result.dart';
 
 /// The verdict of one check within an attempt.
-class CheckOutcome {
+final class CheckOutcome {
   /// Creates an outcome pairing a check [description] with its [result].
   const CheckOutcome({required this.description, required this.result});
 
@@ -13,7 +13,7 @@ class CheckOutcome {
 }
 
 /// One execution of a case: a model output and its check verdicts.
-class AttemptResult {
+final class AttemptResult {
   /// Creates an attempt result.
   const AttemptResult({
     required this.output,
@@ -57,7 +57,7 @@ class AttemptResult {
 }
 
 /// All attempts of one case.
-class CaseResult {
+final class CaseResult {
   /// Creates a case result.
   const CaseResult({required this.caseId, required this.attempts});
 
@@ -86,7 +86,7 @@ class CaseResult {
 ///
 /// Normally produced by `EvalSuite.run`. The constructor is public so
 /// tests and tools can build reports directly.
-class EvalReport {
+final class EvalReport {
   /// Creates a report over [results].
   const EvalReport({required this.results, this.repeat = 1, this.modelId});
 

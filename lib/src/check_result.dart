@@ -11,7 +11,7 @@
 /// produce a verdict at all, for example when a judge response cannot be
 /// parsed. Reports show the two differently so a broken harness is not
 /// mistaken for a failing model.
-class CheckResult {
+final class CheckResult {
   /// Creates a passing result.
   const CheckResult.pass({this.score, this.detail = ''})
     : passed = true,

@@ -9,10 +9,11 @@
 /// `package:llm_eval/io.dart`.
 library;
 
-export 'src/check.dart';
-export 'src/check_result.dart';
-export 'src/eval_case.dart';
-export 'src/eval_report.dart';
-export 'src/eval_suite.dart';
-export 'src/model_call.dart';
-export 'src/response_cache.dart';
+export 'src/check.dart' show Check;
+export 'src/check_result.dart' show CheckResult;
+export 'src/eval_case.dart' show EvalCase;
+export 'src/eval_report.dart'
+    show AttemptResult, CaseResult, CheckOutcome, EvalReport;
+export 'src/eval_suite.dart' show EvalSuite;
+export 'src/model_call.dart' show ModelCall;
+export 'src/response_cache.dart' show NestedModelCallCaching, ResponseCache;
