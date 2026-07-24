@@ -8,7 +8,10 @@ import 'response_cache.dart';
 /// A collection of [EvalCase]s that run together against one model.
 final class EvalSuite {
   /// Creates a suite over [cases].
-  EvalSuite(this.cases);
+  ///
+  /// [cases] is copied, so mutating the list you pass in afterwards does not
+  /// change what the suite runs.
+  EvalSuite(List<EvalCase> cases) : cases = List.unmodifiable(cases);
 
   /// The cases the suite runs, in report order.
   final List<EvalCase> cases;

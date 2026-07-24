@@ -1,3 +1,25 @@
+## 1.0.0
+
+The API is stable. One freeze-blocker was left, found by adversarially testing
+the harness rather than reading it, and it is fixed here.
+
+- **`EvalCase` and `EvalSuite` now copy the collections they are given.**
+  `EvalCase.checks`, `EvalCase.metadata` and `EvalSuite.cases` aliased the
+  caller's list or map, so mutating what you passed in after construction
+  silently changed the case or suite — adding a case to the original list added
+  it to the suite's run. They are now copied to unmodifiable collections at
+  construction. This is the shape of bug (a constructor keeping a live reference
+  to a caller-owned collection) that has to be settled before a 1.0.0 freeze.
+
+Everything else was verified by execution and left unchanged: an empty suite, a
+check that throws, and a model that throws are all handled without crashing; the
+`FileResponseCache` sanitises keys so a path-hostile key cannot escape its
+directory, survives concurrent writes to one key without corruption, and
+round-trips empty and unicode values. The only runtime dependency is `crypto`.
+
+Types are `final` (`Check` and `ResponseCache` stay implementable, since that is
+how you add your own), and the barrel files name what they export.
+
 ## 0.4.1
 
 - Add `example/README.md` for pub.dev's Example tab (it was empty). It walks

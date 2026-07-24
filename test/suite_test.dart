@@ -223,5 +223,41 @@ void main() {
       expect(evalCase.metadata['owner'], 'search-team');
       expect(evalCase.metadata['ticket'], 42);
     });
+
+    test('EvalCase copies the checks and metadata it is given', () {
+      final checks = [Check.contains('ok')];
+      final metadata = <String, Object?>{'k': 1};
+      final evalCase = EvalCase(
+        id: 'a',
+        prompt: 'x',
+        checks: checks,
+        metadata: metadata,
+      );
+
+      // Mutating the caller's collections must not change the case.
+      checks.add(Check.contains('injected'));
+      metadata['injected'] = true;
+      expect(evalCase.checks, hasLength(1));
+      expect(evalCase.metadata.containsKey('injected'), isFalse);
+
+      // And the case's own copies are unmodifiable.
+      expect(
+        () => evalCase.checks.add(Check.contains('x')),
+        throwsUnsupportedError,
+      );
+      expect(() => evalCase.metadata['x'] = 1, throwsUnsupportedError);
+    });
+
+    test('EvalSuite copies the cases it is given', () {
+      final cases = [
+        EvalCase(id: 'a', prompt: 'x', checks: [Check.contains('ok')]),
+      ];
+      final suite = EvalSuite(cases);
+      cases.add(
+        EvalCase(id: 'injected', prompt: 'x', checks: [Check.contains('y')]),
+      );
+      expect(suite.cases, hasLength(1));
+      expect(() => suite.cases.add(cases.first), throwsUnsupportedError);
+    });
   });
 }
