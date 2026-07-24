@@ -1,3 +1,9 @@
+## 0.4.1
+
+- Add `example/README.md` for pub.dev's Example tab (it was empty). It walks
+  through the example suite — cases, checks, and the Markdown report — against
+  the fake deterministic model, with the real output. Docs only.
+
 ## 0.4.0
 
 Freeze hygiene ahead of 1.0.0. No behaviour changes; both items are about what
