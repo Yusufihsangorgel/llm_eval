@@ -1,3 +1,23 @@
+## 1.0.1
+
+- **Put the screenshot caption on one line.** It was a folded scalar wrapped
+  mid-word, and a folded scalar turns the line break into a space, so pub.dev
+  has been rendering `checks o utputs` since the caption was added. The figure
+  is unchanged.
+
+- Gate this package's own CI on an eval suite. `tool/eval.dart` runs four cases
+  and replays every response from the committed `tool/eval_cache/`, so the job
+  makes no model calls and a regression fails it rather than a network blip.
+  The harness is now exercised by the kind of thing it exists for, not only by
+  unit tests.
+
+- Add `example/ci_gate.dart`, an end-to-end suite that runs in CI, and fill out
+  the README around it.
+
+- Move the `xml` dev dependency to `^7.0.0`.
+
+`lib/` is byte-identical to 1.0.0. Nothing here changes the API.
+
 ## 1.0.0
 
 The API is stable. One freeze-blocker was left, found by adversarially testing
