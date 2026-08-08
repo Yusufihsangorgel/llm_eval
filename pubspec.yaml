@@ -12,9 +12,7 @@ topics:
   - ci
 
 screenshots:
-  - description: >-
-      You bind one model function; the harness runs cases concurrently, checks o
-      utputs, caches responses, and reports pass rate and scores.
+  - description: "You bind one model function; the harness runs cases concurrently, checks outputs, caches responses, and reports pass rate and scores."
     path: doc/architecture.png
 
 environment:
