@@ -56,7 +56,14 @@ Future<void> main() async {
 }
 ```
 
-Run the bundled example with `dart run example/llm_eval_example.dart`.
+Two runnable examples ship with the package:
+
+- `dart run example/llm_eval_example.dart` — the shape of a suite.
+- `dart run example/ci_gate.dart` — the whole CI story in one file: a cached
+  suite, a Markdown report, a JUnit file, and an exit code. Run it twice and
+  the second run stops calling the model. It is deliberately red, because a
+  green example teaches you nothing about what a failure looks like in your CI
+  UI.
 
 ## Checks
 
@@ -205,6 +212,14 @@ how many attempts passed. Model output is arbitrary text, so it is escaped
 and characters XML cannot carry are dropped; a single stray control byte
 would otherwise make the report unreadable to the CI system.
 
+This repository runs that step against itself.
+[`tool/eval.dart`](tool/eval.dart) evaluates a small local model, its cache is
+committed under `tool/eval_cache/`, and the GitHub runner has no model to call
+and no key to call it with: the job replays the recorded responses, writes both
+reports, and fails if a fixture is missing. The tool is replay-only unless you
+pass `--record`, so a cache miss goes red instead of quietly reaching for a
+model. See [`.github/workflows/ci.yaml`](.github/workflows/ci.yaml).
+
 ## Repeat and flakiness
 
 ```dart
@@ -223,9 +238,52 @@ non-passing case, suitable for a CI job summary. `EvalReport.toJson()`
 returns a JSON-compatible map with the full result tree (outputs, per-check
 verdicts, scores, latencies, cache hits) for your own tooling.
 
+## Alternatives
+
+Three other pub.dev packages cover nearby ground, and for some projects one of
+them is the better answer. The table below was filled in on 2026-08-08 by
+reading the published source of `eval` 0.0.5, `vouch` 0.1.0 and
+`llm_replay_eval` 0.1.0, not their descriptions.
+
+| | llm_eval | eval | vouch | llm_replay_eval |
+| --- | --- | --- | --- | --- |
+| Works without Flutter | yes | yes | no | no |
+| Runs outside a test harness | yes | no | no | no |
+| Response cache | yes | no | via `llm_replay_eval` | yes |
+| Emits JUnit XML itself | yes | no | no | no |
+| LLM-as-judge | yes | yes | via `llm_replay_eval` | yes |
+| Baseline diff | no | no | yes | no |
+| Several models over one suite | no | yes | no | no |
+
+[`eval`](https://pub.dev/packages/eval) is the closest neighbour: pure Dart,
+built on `package:test`, with matchers for strings, JSON, schemas, frontmatter,
+edit distance, judges and RAG. Because an eval there *is* a Dart test, you get
+CI reporting from `package:test`'s own reporters and need nothing extra. It
+also does two things this package does not: comparing several models or prompt
+variants over one suite, and eval statistics with a declared winner. It has no
+response cache, so every rerun calls the model again.
+
+[`vouch`](https://pub.dev/packages/vouch) freezes a baseline of a run and diffs
+later runs against it, which answers "what changed when I swapped the model?"
+— a question `llm_eval` cannot answer today. It is Flutter-only and layers on
+`llm_replay_eval`.
+
+[`llm_replay_eval`](https://pub.dev/packages/llm_replay_eval) records and
+replays at the *on-device inference boundary*, for in-process Flutter models
+where there is no HTTP call to intercept. `llm_eval`'s cache wraps whatever
+function you hand it, which covers a provider API call but is not tied to
+on-device inference. It is Flutter-only.
+
+Pick `llm_eval` when the eval is a standalone build step in a Dart project:
+`dart run tool/eval.dart`, a committed cache, an exit code, and a JUnit file
+the CI UI can read, with no Flutter and one dependency. Pick `eval` when you
+would rather write matchers inside the `dart test` suite you already have, or
+you need to compare models. Pick `llm_replay_eval`, with `vouch` on top, when
+the model runs on the device.
+
 ## Planned
 
-Out of scope for 0.1 and planned for later releases:
+Out of scope for 1.0 and planned for later releases:
 
 - side-by-side comparison of several models over one suite
 - token and cost accounting

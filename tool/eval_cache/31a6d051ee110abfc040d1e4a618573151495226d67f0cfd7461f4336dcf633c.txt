@@ -1,0 +1,3 @@
+SCORE: 0.75
+
+The output partially answers the question by stating that a solar eclipse occurs when the moon passes between the sun and Earth, blocking part or all of the sun's light. However, it does not explicitly define what "block" means in this context. Therefore, it cannot be considered fully satisfied against the rubric.

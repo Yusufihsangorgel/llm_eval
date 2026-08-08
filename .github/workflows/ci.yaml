@@ -23,3 +23,29 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed .
       - run: dart analyze --fatal-infos
       - run: dart test
+
+      # This package sells eval suites as a CI gate, so it gates its own CI on
+      # one. There is no Ollama on this runner and no API key in this repo:
+      # every response is replayed from the committed tool/eval_cache, which is
+      # the offline, deterministic, zero-cost run the README promises. The tool
+      # is replay-only unless passed --record, so a cache miss fails the job
+      # instead of quietly calling a model.
+      #
+      # Deliberately not piped into tee: a pipeline reports the exit status of
+      # its last command, which would hide a failing gate behind a successful
+      # tee.
+      - name: Eval gate
+        run: dart run tool/eval.dart
+
+      # Both reports are written even when the gate fails, which is when they
+      # are worth reading -- hence if: always() on the two steps below.
+      - name: Publish the eval report to the job summary
+        if: always()
+        run: cat eval-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the JUnit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval-results.xml

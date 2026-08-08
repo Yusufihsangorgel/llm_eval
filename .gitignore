@@ -1,3 +1,15 @@
 .dart_tool/
 build/
 pubspec.lock
+
+# Written by example/ci_gate.dart. Left out of version control on purpose:
+# the example's point is that the first run records and the second replays,
+# so every reader has to start with a cold cache.
+example/.eval_cache/
+example/eval-results.xml
+
+# Written by tool/eval.dart. Both reports are build artifacts; the cache they
+# are built from (tool/eval_cache/) is the opposite -- that one is committed,
+# which is what lets the eval job run offline.
+eval-results.xml
+eval-report.md

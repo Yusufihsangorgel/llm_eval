@@ -1,0 +1,6 @@
+```json
+{
+  "city": "Paris",
+  "country": "France"
+}
+```
