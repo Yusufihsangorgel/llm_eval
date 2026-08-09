@@ -14,8 +14,8 @@ cases concurrently, checking outputs, caching responses, and reporting.
 ## Why
 
 Dart and Flutter apps that call LLMs usually have no automated way to catch
-a prompt regression. Model output is not exact, so plain string equality in
-a unit test does not work. This package covers the middle ground. It gives
+a prompt regression. Model output is not exact, which rules out plain string
+equality in a unit test. This package covers the middle ground. It gives
 you assertion-style checks for the properties that must hold. For the fuzzy
 parts, there is an optional LLM judge. A response cache keeps CI runs
 deterministic and free.
@@ -56,14 +56,17 @@ Future<void> main() async {
 }
 ```
 
-Two runnable examples ship with the package:
+Three runnable examples ship with the package:
 
-- `dart run example/llm_eval_example.dart` — the shape of a suite.
-- `dart run example/ci_gate.dart` — the whole CI story in one file: a cached
+- `dart run example/llm_eval_example.dart` shows the shape of a suite.
+- `dart run example/ci_gate.dart` is the whole CI story in one file: a cached
   suite, a Markdown report, a JUnit file, and an exit code. Run it twice and
   the second run stops calling the model. It is deliberately red, because a
   green example teaches you nothing about what a failure looks like in your CI
   UI.
+- `dart run example/judge.dart` puts a judge on three outputs and lands one of
+  each verdict: a score above the threshold, a score below it, and a judge
+  reply with no score in it at all.
 
 ## Checks
 
@@ -106,6 +109,10 @@ output that smuggles in its own `SCORE: 1.0` line tends to produce. The
 graded output is wrapped in delimiters the judge is told to respect; this
 raises the bar against prompt injection without eliminating it.
 
+[`example/judge.dart`](example/judge.dart) runs all three outcomes against a
+fake judge, with no key and no network: a score above `passAt`, a score below
+it, and a reply that never produces a score line.
+
 One honest caveat: the judge is itself an LLM. Its scores are not
 calibrated, they drift across judge models and versions, and they can be
 wrong. Use judges sparingly, pin the judge model, and spot-check its
@@ -122,7 +129,7 @@ Check.judge(
 )
 ```
 
-`cache.wrap` uses the same key scheme as the suite, so the judge's
+`cache.wrap` uses the same key scheme as the suite: the judge's
 responses sit alongside the model responses in one cache directory. Give
 each judge its own `modelId` so pinning or changing a judge re-records only
 its own responses.
@@ -130,7 +137,7 @@ its own responses.
 ## Caching and CI
 
 The core library is pure Dart and runs on every platform, including the
-web. `FileResponseCache` needs `dart:io`, so it lives in a separate
+web. `FileResponseCache` needs `dart:io` and lives in a separate
 library:
 
 ```dart
@@ -151,7 +158,7 @@ The cache covers the model under test. A nested call, such as the judge in
 a `Check.judge`, is not cached by `suite.run`, so a warm cache still calls
 the judge unless you wrap it with `cache.wrap(judgeModel, modelId: ...)`
 (see [LLM as judge](#llm-as-judge)). The Markdown report's `cached` column
-likewise describes the model under test, not any nested judge.
+likewise describes the model under test rather than any nested judge.
 
 A regression test then looks like any other test:
 
@@ -181,8 +188,8 @@ if (report.results.isEmpty || report.errorCount > 0 || report.passRate < 1.0) {
 Check `errorCount` separately from the pass rate: errors mean the harness
 could not produce a verdict (a judge response failed to parse, a callback
 threw), not that the model answered badly. Note that an empty suite has a
-pass rate of 1.0, so guard against accidentally building zero cases, as
-both snippets above do.
+pass rate of 1.0; guard against accidentally building zero cases, as both
+snippets above do.
 
 ### Showing results in the CI UI
 
@@ -264,8 +271,8 @@ variants over one suite, and eval statistics with a declared winner. It has no
 response cache, so every rerun calls the model again.
 
 [`vouch`](https://pub.dev/packages/vouch) freezes a baseline of a run and diffs
-later runs against it, which answers "what changed when I swapped the model?"
-— a question `llm_eval` cannot answer today. It is Flutter-only and layers on
+later runs against it. That shows what changed when you swapped the model,
+which `llm_eval` cannot do today. It is Flutter-only and layers on
 `llm_replay_eval`.
 
 [`llm_replay_eval`](https://pub.dev/packages/llm_replay_eval) records and

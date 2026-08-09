@@ -103,3 +103,42 @@ so every reader starts cold and sees both runs. A real project commits it —
 this repository commits its own under `tool/eval_cache/`, which is what lets
 [`tool/eval.dart`](../tool/eval.dart) run as a CI step with no model, no key
 and no network.
+
+## `judge.dart` scores what a check cannot
+
+`Check.contains` and its siblings cover the properties you can write down.
+`judge.dart` covers the rest: hand the output to a second model along with a
+rubric and let the score it returns decide. Three cases run, and one lands on
+each of the three verdicts a judge can produce.
+
+```
+dart run example/judge.dart
+```
+
+```
+| case                 | status | checks | latency | cached |
+| -------------------- | ------ | ------ | ------- | ------ |
+| summary-keeps-caveat | pass   | 2/2    | 2ms     | no     |
+| refund-reply-tone    | fail   | 0/1    | 1ms     | no     |
+| currency-is-explicit | error  | 0/1    | 1ms     | no     |
+
+model calls: 3   judge calls: 3
+```
+
+1. `summary-keeps-caveat` pairs `Check.contains('duplicate')` with a judge on
+   the same output. The substring check proves the word survived. Whether the
+   warning still reads as a warning is the part only the judge can answer.
+2. `refund-reply-tone` reports
+   `fail: judge score >= 0.7 (judge scored 0.4, below 0.7)`. Both numbers are
+   in the line, which is what tells you whether to fix the prompt or move the
+   threshold. Every fact in that reply is correct; the tone is what fails it,
+   and no substring check was ever going to catch that.
+3. `currency-is-explicit` is an `error` rather than a `fail`. The judge
+   answered in prose and llm_eval will not guess a number out of it:
+   `judge response has no parsable "SCORE: <number>" line`. A fail means the
+   output was graded and came up short. An error means nothing was graded.
+
+The last line counts both models. A judge check doubles the calls a suite
+makes, and `suite.run`'s cache covers only the model under test, since the
+judge runs one level down inside a check. Wrap it with `cache.wrap` to give it
+a cache of its own.
