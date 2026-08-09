@@ -11,6 +11,36 @@ cases concurrently, checking outputs, caching responses, and reporting.
 
 ![Diagram: suite.run runs each case concurrently through a response cache, checks, and an optional LLM judge, then aggregates the results into an EvalReport](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/architecture.png)
 
+## Why this instead of what you already have
+
+**Instead of plain `package:test`.** You can already call a model inside a test
+and assert on the reply. What that leaves you is everything around it: the
+second run costs another call and can come back different. `llm_eval` keys each
+prompt to a file on disk (`FileResponseCache`, `lib/src/file_response_cache.dart:18`),
+so the rerun is free and byte-identical. `EvalReport.toJUnitXml()`
+(`lib/src/eval_report.dart:203`) writes a report your CI already renders, and
+`BaselineCase` (`lib/src/baseline.dart:6`) names the case that flipped since the
+last run you accepted.
+
+**Instead of `eval`.** It has the wider matcher set, including RAG scoring and
+statistics, and it is the closest package on pub.dev to this one. It calls the
+provider every time: `apiCallImpl` posts straight to the API with nothing in
+front of it (`lib/src/services/service.dart:169`), and `eval()` reruns the whole
+test function once per `numberOfRunsPerLLM` (`lib/src/eval_base.dart:91`). Grep
+its 5,167 lines of `lib/` for `cache`, `junit`, `xml`, or `baseline` and all four
+return nothing.
+
+**Reach for it when**
+
+- You have prompts in production and nothing that goes red when one of them
+  regresses.
+- The suite has to run on every pull request, so it cannot cost money or return
+  different text each time.
+- You want the result in the CI UI as a JUnit file, not in scrollback.
+
+Skip it if you call a model in exactly one place, where a `contains` check in a
+test you already have does the same job without a cache directory to commit.
+
 ## Why
 
 Dart and Flutter apps that call LLMs usually have no automated way to catch
