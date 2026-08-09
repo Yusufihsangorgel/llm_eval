@@ -9,6 +9,8 @@
 /// `package:llm_eval/io.dart`.
 library;
 
+export 'src/baseline.dart'
+    show BaselineCase, CaseChange, EvalBaseline, EvalDiff, diffAgainstBaseline;
 export 'src/check.dart' show Check;
 export 'src/check_result.dart' show CheckResult;
 export 'src/eval_case.dart' show EvalCase;

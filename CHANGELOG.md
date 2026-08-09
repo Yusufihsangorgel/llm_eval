@@ -1,3 +1,23 @@
+## 1.1.0
+
+- Add `EvalBaseline` and `diffAgainstBaseline`. A pass-rate threshold cannot
+  see composition: nine of ten passing before and nine of ten now is the same
+  number whether nothing moved or one case broke while another was fixed, and
+  deleting the failing case moves the rate exactly the way repairing it does.
+  A baseline keeps the identity of what passed, and the diff names what
+  changed.
+- `EvalDiff.hasRegressions` stops for four things: a case that stopped
+  passing, a score that fell past the tolerance while the case still passed, a
+  case that was steady and now disagrees between attempts, and a case that is
+  in the baseline and missing from the run. Fixes and new cases are reported
+  without stopping the build.
+- A baseline records the lowest score each check reached across the attempts
+  of one case, which is the number a threshold would have tripped on. Keeping
+  the last would let a bad attempt hide behind a good one that ran second.
+- `toJsonString` and `EvalBaseline.parse` are the round trip for a file
+  committed next to your tests. `toMarkdown` renders the diff for a CI log and
+  names a model change when the baseline and the run disagree about the model.
+
 ## 1.0.2
 
 - `example/judge.dart` runs `Check.judge`. The README answers the part of a

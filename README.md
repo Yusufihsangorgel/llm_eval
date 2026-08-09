@@ -227,6 +227,59 @@ reports, and fails if a fixture is missing. The tool is replay-only unless you
 pass `--record`, so a cache miss goes red instead of quietly reaching for a
 model. See [`.github/workflows/ci.yaml`](.github/workflows/ci.yaml).
 
+## Catching a regression a pass rate hides
+
+A threshold on the pass rate cannot see composition. Nine of ten passing before
+and nine of ten passing now is the same number whether nothing moved or one
+case broke while another was fixed. Deleting the case that was failing moves
+the rate the same way repairing it does.
+
+A baseline keeps the identity of what passed, so both of those read as what
+they are:
+
+```dart
+final report = await suite.run(model, modelId: 'gpt-4o-mini');
+
+final file = File('test/eval_baseline.json');
+if (!file.existsSync()) {
+  file.writeAsStringSync(EvalBaseline.fromReport(report).toJsonString());
+  return; // first run records, later runs compare
+}
+
+final diff = diffAgainstBaseline(
+  report,
+  EvalBaseline.parse(file.readAsStringSync()),
+);
+stdout.write(diff.toMarkdown());
+if (diff.hasRegressions) exitCode = 1;
+```
+
+`hasRegressions` stops for four things: a case that stopped passing, a check
+whose score fell past `scoreTolerance` while the case still passed, a case that
+was steady and now disagrees between attempts, and a case that is in the
+baseline and missing from the run. Fixes and new cases are reported and do not
+stop the build.
+
+Commit the baseline next to your tests. Re-record it in the same commit that
+explains why the numbers moved, which keeps the file honest about being a
+decision rather than a leftover.
+
+A model swap is reported rather than refused, since a deliberate swap is
+exactly when the diff is worth reading:
+
+```
+## Baseline diff
+
+Model changed: `gpt-4o-mini` to `gpt-4o`.
+
+### Regressions (1)
+
+- `refund-policy`: was passing, now failing
+
+### Fixed (2)
+...
+```
+
 ## Repeat and flakiness
 
 ```dart
