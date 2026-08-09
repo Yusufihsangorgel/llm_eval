@@ -1,3 +1,10 @@
+## 1.0.2
+
+- `example/judge.dart` runs `Check.judge`. The README answers the part of a
+  model's reply no assertion can pin down with a judge, and neither example
+  called one. The new file scores an answer against a rubric with a scripted
+  judge, no network and no key. Docs and example only.
+
 ## 1.0.1
 
 - **Put the screenshot caption on one line.** It was a folded scalar wrapped
