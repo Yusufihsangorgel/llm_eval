@@ -1,3 +1,13 @@
+## 1.1.1
+
+- The baseline section opens on a picture. `tool/baseline_figure.dart` runs two
+  evals that land on the same 75% pass rate, one of which broke a case while
+  another was fixed, and draws `doc/baseline-diff.png` from the diff it gets
+  back. The generator refuses to write the file if the two runs stop agreeing
+  on the rate, which keeps the figure from outliving the claim it illustrates.
+- Drop `doc/judge-cache.png`. Nothing referenced it and it was 162 KB of every
+  download.
+
 ## 1.1.0
 
 - Add `EvalBaseline` and `diffAgainstBaseline`. A pass-rate threshold cannot

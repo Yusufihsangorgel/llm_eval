@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 380"
+     font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="36" font-size="17" font-weight="600" fill="#111827">
+  Same pass rate, and one of these runs broke something
+</text>
+<text x="190.0" y="72" text-anchor="middle" font-size="15"
+      font-weight="600" fill="#111827">baseline</text>
+<text x="190.0" y="94" text-anchor="middle" font-size="13" fill="#6b7280">
+  pass rate 75%
+</text>
+<rect x="40.0" y="118.0" width="300" height="32" rx="6"
+      fill="#ecfdf5" stroke="#a7f3d0"/>
+<text x="54.0" y="139.0" font-size="14" font-family="monospace"
+      fill="#111827">refund-policy</text>
+<text x="326.0" y="139.0" font-size="14" text-anchor="end"
+      fill="#047857">pass</text>
+<rect x="40.0" y="160.0" width="300" height="32" rx="6"
+      fill="#ecfdf5" stroke="#a7f3d0"/>
+<text x="54.0" y="181.0" font-size="14" font-family="monospace"
+      fill="#111827">order-status</text>
+<text x="326.0" y="181.0" font-size="14" text-anchor="end"
+      fill="#047857">pass</text>
+<rect x="40.0" y="202.0" width="300" height="32" rx="6"
+      fill="#fee2e2" stroke="#fca5a5"/>
+<text x="54.0" y="223.0" font-size="14" font-family="monospace"
+      fill="#111827">shipping-eta</text>
+<text x="326.0" y="223.0" font-size="14" text-anchor="end"
+      fill="#b91c1c">fail</text>
+<rect x="40.0" y="244.0" width="300" height="32" rx="6"
+      fill="#ecfdf5" stroke="#a7f3d0"/>
+<text x="54.0" y="265.0" font-size="14" font-family="monospace"
+      fill="#111827">greeting</text>
+<text x="326.0" y="265.0" font-size="14" text-anchor="end"
+      fill="#047857">pass</text>
+<text x="650.0" y="72" text-anchor="middle" font-size="15"
+      font-weight="600" fill="#111827">this run</text>
+<text x="650.0" y="94" text-anchor="middle" font-size="13" fill="#6b7280">
+  pass rate 75%
+</text>
+<rect x="500.0" y="118.0" width="300" height="32" rx="6"
+      fill="#fee2e2" stroke="#fca5a5"/>
+<text x="514.0" y="139.0" font-size="14" font-family="monospace"
+      fill="#111827">refund-policy</text>
+<text x="786.0" y="139.0" font-size="14" text-anchor="end"
+      fill="#b91c1c">fail</text>
+<rect x="500.0" y="160.0" width="300" height="32" rx="6"
+      fill="#ecfdf5" stroke="#a7f3d0"/>
+<text x="514.0" y="181.0" font-size="14" font-family="monospace"
+      fill="#111827">order-status</text>
+<text x="786.0" y="181.0" font-size="14" text-anchor="end"
+      fill="#047857">pass</text>
+<rect x="500.0" y="202.0" width="300" height="32" rx="6"
+      fill="#ecfdf5" stroke="#a7f3d0"/>
+<text x="514.0" y="223.0" font-size="14" font-family="monospace"
+      fill="#111827">shipping-eta</text>
+<text x="786.0" y="223.0" font-size="14" text-anchor="end"
+      fill="#047857">pass</text>
+<rect x="500.0" y="244.0" width="300" height="32" rx="6"
+      fill="#ecfdf5" stroke="#a7f3d0"/>
+<text x="514.0" y="265.0" font-size="14" font-family="monospace"
+      fill="#111827">greeting</text>
+<text x="786.0" y="265.0" font-size="14" text-anchor="end"
+      fill="#047857">pass</text>
+<text x="430" y="139" text-anchor="middle" font-size="18"
+      fill="#b91c1c">&#8594;</text>
+<text x="430" y="223" text-anchor="middle" font-size="18"
+      fill="#047857">&#8594;</text>
+<rect x="40" y="300" width="780" height="52" rx="8" fill="#f9fafb"
+      stroke="#e5e7eb"/>
+<text x="58" y="322" font-size="13" fill="#b91c1c" font-weight="600">
+  regression &#183; <tspan font-family="monospace">refund-policy</tspan>
+</text>
+<text x="58" y="342" font-size="13" fill="#047857" font-weight="600">
+  fixed &#183; <tspan font-family="monospace">shipping-eta</tspan>
+</text>
+<text x="802" y="332" font-size="13" text-anchor="end" fill="#6b7280">
+  a threshold on 75% sees neither
+</text>
+</svg>
