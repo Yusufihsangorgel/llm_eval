@@ -23,6 +23,9 @@
 //   dart run example/ci_gate.dart   # warm cache: 1 model call
 //
 // Both runs exit 1. That is the point.
+//
+// EXAMPLE-EXPECTS-NONZERO — for the sweep that runs every example in the
+// portfolio, so a red exit here is read as working rather than broken.
 
 import 'dart:io';
 
