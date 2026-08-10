@@ -1,3 +1,13 @@
+## 1.3.0
+
+- Error strings in a report no longer carry the absolute paths of the machine
+  that produced them. `describeError` shortens `file://` frames to their last
+  two segments, keeping the file and line; `package:` and `dart:` frames are
+  unchanged. These strings are written to be pasted into a pull request, and a
+  home directory or a runner's checkout path is no use to whoever reads them.
+- `example/ci_gate.dart` prints its JUnit path relative to the working
+  directory for the same reason.
+
 ## 1.2.0
 
 - The README now answers, in its first screen, why to reach for this rather
