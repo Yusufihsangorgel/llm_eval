@@ -1,3 +1,12 @@
+## 1.3.1
+
+- New `example/baseline_diff.dart`. Baseline diffing is the argument this
+  package makes against a pass-rate threshold, and it had a figure and a
+  paragraph but no runnable code. Two scripted runs, both at 75%, one case
+  broken and one fixed: the rate says nothing moved, the diff names both.
+  Round-trips the baseline through JSON on the way, which is what committing
+  one looks like.
+
 ## 1.3.0
 
 - Error strings in a report no longer carry the absolute paths of the machine

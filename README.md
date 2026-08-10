@@ -280,6 +280,10 @@ they are:
 
 ![Two eval runs side by side, both at a 75% pass rate. In the baseline shipping-eta fails; in the second run it passes and refund-policy fails instead. The diff names refund-policy as a regression and shipping-eta as fixed, which a threshold on 75% cannot see.](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/baseline-diff.png)
 
+`dart run example/baseline_diff.dart` is that figure as running code: two
+scripted runs, both at 75%, and the diff naming `refund-policy` as the
+regression and `shipping-eta` as the fix. No key and no network.
+
 `tool/baseline_figure.dart` draws that from a diff it computes as it runs, and
 it refuses to write the file if the two runs stop sharing a pass rate.
 
