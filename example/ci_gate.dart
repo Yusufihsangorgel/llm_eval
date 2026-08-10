@@ -183,7 +183,7 @@ Future<void> main() async {
           '${report.results.length - report.passedCount}',
   ];
 
-  stdout.writeln('\nJUnit XML written to $xmlPath');
+  stdout.writeln('\nJUnit XML written to ${_relativeToCwd(xmlPath)}');
   if (reasons.isEmpty) {
     stdout.writeln('gate: PASS');
     exitCode = 0;
@@ -194,4 +194,15 @@ Future<void> main() async {
     stdout.writeln('  - $reason');
   }
   exitCode = 1;
+}
+
+/// Drops the current directory from the front of [path] when it is there.
+///
+/// What gets printed is a line someone reads in a CI log or pastes into a
+/// terminal. The absolute form is the layout of whichever machine happened to
+/// run the suite, which is a developer's home directory locally and a runner's
+/// checkout in CI, and neither is useful to whoever is reading.
+String _relativeToCwd(String path) {
+  final prefix = '${Directory.current.path}${Platform.pathSeparator}';
+  return path.startsWith(prefix) ? path.substring(prefix.length) : path;
 }

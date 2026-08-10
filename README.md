@@ -5,6 +5,17 @@
 A test harness for LLM outputs in Dart. Write eval cases the way you write
 unit tests: a prompt, a list of checks, and a report you can read in CI.
 
+![A run of example/ci_gate.dart: the Markdown report, a case failing on the phrase "as an ai", the 429 kept out of the pass rate, and the gate exiting red](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/ci-gate.gif)
+
+That is `dart run example/ci_gate.dart`, recorded, not drawn. A model version
+bump has quietly regressed one answer, one case hit a 429, and the gate goes
+red for the two reasons separately — a rate limit is not a prompt regression
+and folding them together costs you an afternoon.
+
+It is the **second** run: the first calls the model four times, this one calls
+it once. The three answers it did not need came off disk, which is why an eval
+job can run on every pull request without a budget conversation.
+
 `llm_eval` does not talk to any model provider. You hand it one function
 that takes a prompt and returns the model output, and it handles running
 cases concurrently, checking outputs, caching responses, and reporting.
