@@ -97,7 +97,7 @@ Future<void> main() async {
 }
 ```
 
-Three runnable examples ship with the package:
+Runnable examples ship with the package:
 
 - `dart run example/llm_eval_example.dart` shows the shape of a suite.
 - `dart run example/ci_gate.dart` is the whole CI story in one file: a cached
@@ -108,6 +108,11 @@ Three runnable examples ship with the package:
 - `dart run example/judge.dart` puts a judge on three outputs and lands one of
   each verdict: a score above the threshold, a score below it, and a judge
   reply with no score in it at all.
+- `dart run example/mcp_tool_eval.dart` is the MCP bridge: the text a tool
+  returned, checked the way this package checks a model output. Recorded
+  against mcp_probe's well-behaved fixture, no live model and no network.
+  mcp_probe is not a dependency of this package; the comments say why and
+  name the friction at the seam.
 
 ## Checks
 

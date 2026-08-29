@@ -1,3 +1,17 @@
+## 1.3.2
+
+- New `example/mcp_tool_eval.dart`. An MCP server's tools return text a
+  model consumes; whether that text is any good is an eval, and whether the
+  server behaves is conformance, and the two had never been shown together.
+  The example runs this package's cases and checks over a recorded session
+  against mcp_probe's well-behaved fixture. mcp_probe is not a dependency,
+  not even a dev one: a path would make the package unpublishable and this
+  repo's CI unable to `pub get`, and a hosted import would pull dart_mcp
+  into a package whose examples are otherwise all fakes. The comments name
+  the seam instead of wrapping it until a tool call looks like a
+  `ModelCall` — a prompt is not a name-and-arguments, a string is not a
+  `CallToolResult`, and `isError` is not a throw.
+
 ## 1.3.1
 
 - New `example/baseline_diff.dart`. Baseline diffing is the argument this

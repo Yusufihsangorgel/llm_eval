@@ -142,3 +142,28 @@ The last line counts both models. A judge check doubles the calls a suite
 makes, and `suite.run`'s cache covers only the model under test, since the
 judge runs one level down inside a check. Wrap it with `cache.wrap` to give it
 a cache of its own.
+
+## `mcp_tool_eval.dart` — tool text is an eval
+
+MCP tools return text a model consumes. Whether that text is any good is this
+package's question; whether the server behaves is mcp_probe's. This file is
+both, against a recorded session of mcp_probe's well-behaved fixture — echo,
+read_env, the greeting resource, the greet prompt — with `fail_tool` run two
+ways so the seam is visible rather than wrapped.
+
+```
+dart run example/mcp_tool_eval.dart
+```
+
+mcp_probe is not a dependency of this package. A path dep would make a
+publish fail and this repo's CI fail `pub get`; a hosted one would pull
+`dart_mcp` into a lockfile whose examples are otherwise all fakes. In a
+project that owns a server, mcp_probe belongs in *that* `dev_dependencies`,
+and the live `McpServerHarness.start` / `callTool` wiring is in the file's
+header comment.
+
+The two APIs do not fit. `ModelCall` is a prompt-to-string; `callTool` is a
+name-and-arguments-to-`CallToolResult`. Checks run on a `String`; a tool
+result is content plus a nullable `isError`. Flatten `fail_tool` and a
+`contains` check passes on a tool that failed. Throw and it lands in
+`errorCount`, which is not a failed check. The example runs both mappings.

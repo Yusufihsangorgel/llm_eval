@@ -104,6 +104,7 @@ dart test
 dart run example/llm_eval_example.dart
 dart run example/judge.dart
 dart run example/baseline_diff.dart
+dart run example/mcp_tool_eval.dart
 ```
 
 `dart run example/ci_gate.dart` exits 1 by design.
