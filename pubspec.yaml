@@ -5,11 +5,11 @@ description: >-
 version: 1.3.2
 repository: https://github.com/Yusufihsangorgel/llm_eval
 topics:
-  - llm
-  - ai
-  - testing
   - evaluation
-  - ci
+  - llm-evaluation
+  - llm-testing
+  - llm-as-judge
+  - response-caching
 
 screenshots:
   - description: "Two eval runs at the same 75% pass rate: one case broke while another was fixed, and the baseline diff names both while a threshold on the rate sees neither."
