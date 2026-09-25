@@ -23,6 +23,7 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed .
       - run: dart analyze --fatal-infos
       - run: dart test
+      - run: dart test -p chrome
 
       # This package sells eval suites as a CI gate, so it gates its own CI on
       # one. There is no Ollama on this runner and no API key in this repo:

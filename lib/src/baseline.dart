@@ -35,13 +35,7 @@ class BaselineCase {
         final c = check as Map;
         final score = c['score'];
         if (score is num) {
-          final key = c['description'] as String? ?? '';
-          // Several attempts of one case each score the same check. The lowest
-          // is the one a gate should remember, because it is the one that
-          // would have failed a threshold.
-          final existing = scores[key];
-          final value = score.toDouble();
-          if (existing == null || value < existing) scores[key] = value;
+          _keepLowest(scores, c['description'] as String? ?? '', score);
         }
       }
     }
@@ -73,6 +67,17 @@ class BaselineCase {
   );
 }
 
+/// Keeps [score] for [description] unless [scores] already holds a lower one.
+///
+/// Several attempts of one case each score the same check. The lowest is the
+/// one a gate should remember, because it is the one that would have failed
+/// a threshold.
+void _keepLowest(Map<String, double> scores, String description, num score) {
+  final value = score.toDouble();
+  final existing = scores[description];
+  if (existing == null || value < existing) scores[description] = value;
+}
+
 /// A run you were happy with, kept so the next one can be compared to it.
 ///
 /// A pass-rate threshold cannot see composition. Nine of ten passing before
@@ -94,17 +99,23 @@ class EvalBaseline {
 
   /// Captures [report] as a baseline.
   factory EvalBaseline.fromReport(EvalReport report) {
-    final json = report.toJson();
-    final list = (json['cases'] as List? ?? const []);
-    return EvalBaseline(
-      modelId: json['modelId'] as String?,
-      cases: {
-        for (final c in list)
-          (c as Map)['id'] as String: BaselineCase.fromReportJson(
-            c.cast<String, Object?>(),
-          ),
-      },
-    );
+    final cases = <String, BaselineCase>{};
+    for (final result in report.results) {
+      final scores = <String, double>{};
+      for (final attempt in result.attempts) {
+        for (final check in attempt.checks) {
+          final score = check.result.score;
+          if (score != null) _keepLowest(scores, check.description, score);
+        }
+      }
+      cases[result.caseId] = BaselineCase(
+        id: result.caseId,
+        passed: result.passed,
+        flaky: result.isFlaky,
+        checkScores: scores,
+      );
+    }
+    return EvalBaseline(modelId: report.modelId, cases: cases);
   }
 
   /// This baseline as JSON, ready for `File.writeAsString`.
@@ -116,6 +127,9 @@ class EvalBaseline {
 
   /// Reads a baseline back from [toJson].
   factory EvalBaseline.fromJson(Map<String, Object?> json) {
+    if (json.containsKey('version') && json['version'] != 1) {
+      throw FormatException('Unsupported baseline version: ${json['version']}');
+    }
     final list = (json['cases'] as List? ?? const []);
     return EvalBaseline(
       modelId: json['modelId'] as String?,

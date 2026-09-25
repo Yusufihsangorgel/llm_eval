@@ -21,8 +21,6 @@ final class FileResponseCache implements ResponseCache {
 
   final Directory _directory;
 
-  static int _tempCounter = 0;
-
   File _fileFor(String key) {
     final digest = sha256.convert(utf8.encode(key)).toString();
     return File('${_directory.path}/$digest.txt');
@@ -39,8 +37,13 @@ final class FileResponseCache implements ResponseCache {
   Future<void> write(String key, String response) async {
     await _directory.create(recursive: true);
     final target = _fileFor(key);
-    final temp = File('${target.path}.tmp.$pid.${_tempCounter++}');
-    await temp.writeAsString(response, flush: true);
-    await temp.rename(target.path);
+    final tempDirectory = await _directory.createTemp('.llm_eval_tmp_');
+    final temp = File('${tempDirectory.path}/response');
+    try {
+      await temp.writeAsString(response, flush: true);
+      await temp.rename(target.path);
+    } finally {
+      await tempDirectory.delete(recursive: true);
+    }
   }
 }

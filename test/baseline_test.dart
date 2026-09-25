@@ -204,6 +204,24 @@ void main() {
     expect(diff.fixes.map((c) => c.id), ['b']);
   });
 
+  test('a baseline without a version reads as version 1', () {
+    final baseline = EvalBaseline.fromJson(<String, Object?>{
+      'cases': <Object?>[],
+    });
+
+    expect(baseline.cases, isEmpty);
+  });
+
+  test('an unknown baseline version is rejected', () {
+    expect(
+      () => EvalBaseline.fromJson(<String, Object?>{
+        'version': 2,
+        'cases': <Object?>[],
+      }),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('a model change is reported rather than refused', () async {
     final before = await run(['a'], modelId: 'old');
     final diff = diffAgainstBaseline(

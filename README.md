@@ -404,6 +404,7 @@ Out of scope for 1.0 and planned for later releases:
 - token and cost accounting
 - dataset loaders for existing eval formats
 - structured prompts: system messages and multi-turn conversations
+- one model call for identical prompts that are in flight at the same time
 
 ## License
 

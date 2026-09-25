@@ -1,5 +1,9 @@
 import 'model_call.dart';
 
+/// Builds the length-prefixed key shared by suite and wrapped model calls.
+String cacheKey(String label, String prompt) =>
+    '${label.length}:$label\n$prompt';
+
 /// Stores model responses between runs.
 ///
 /// `EvalSuite.run` builds a cache key from its `modelId` argument and the
@@ -48,12 +52,12 @@ extension NestedModelCallCaching on ResponseCache {
   /// instead of silently returning a response the cache never stored.
   ModelCall wrap(ModelCall call, {required String modelId}) {
     return (String prompt) async {
-      // Same length-prefixed key as EvalSuite._runAttempt; keep in sync.
-      final key = '${modelId.length}:$modelId\n$prompt';
+      final key = cacheKey(modelId, prompt);
       String? cached;
+      // A cache read that throws counts as a miss.
       try {
         cached = await read(key);
-      } catch (_) {
+      } on Object catch (_) {
         cached = null;
       }
       if (cached != null) return cached;

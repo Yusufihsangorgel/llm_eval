@@ -1,3 +1,7 @@
+@TestOn('vm')
+@Tags(['e2e'])
+library;
+
 import 'dart:convert';
 import 'dart:io';
 

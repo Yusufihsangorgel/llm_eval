@@ -1,3 +1,13 @@
+## Unreleased
+
+- `EvalBaseline.fromJson` reads a baseline without a `version` field as
+  version 1 and throws `FormatException` for any other version. Before, the
+  field was written but never read.
+- `FileResponseCache.write` stages each response in its own temporary
+  directory. The temporary file name used to come from a static counter, and
+  every isolate has its own copy of a static field. Two isolates of one
+  process writing the same key could pick the same name.
+
 ## 1.3.2
 
 - New `example/mcp_tool_eval.dart`. An MCP server's tools return text a

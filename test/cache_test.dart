@@ -1,3 +1,6 @@
+@TestOn('vm')
+library;
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -113,9 +116,26 @@ void main() {
 
       final leftovers = tempDir
           .listSync()
-          .where((entity) => entity.path.contains('.tmp.'))
+          .where(
+            (entity) =>
+                entity.path.contains('.tmp.') ||
+                entity.path.contains('.llm_eval_tmp_'),
+          )
           .toList();
       expect(leftovers, isEmpty);
+    });
+
+    test('concurrent cache instances use unique temporary paths', () async {
+      final caches = [
+        for (var i = 0; i < 4; i++) FileResponseCache(tempDir.path),
+      ];
+
+      await Future.wait([
+        for (var i = 0; i < caches.length; i++) caches[i].write('shared', '$i'),
+      ]);
+
+      expect(await caches.first.read('shared'), anyOf('0', '1', '2', '3'));
+      expect(tempDir.listSync(recursive: true).whereType<Directory>(), isEmpty);
     });
 
     test('a different modelId misses the cache', () async {

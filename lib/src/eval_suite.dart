@@ -41,8 +41,7 @@ final class EvalSuite {
   /// error result on that check.
   ///
   /// Identical prompts in different cases are not deduplicated while in
-  /// flight; each case calls the model itself. Deduplication is planned
-  /// for a later release.
+  /// flight; each case calls the model itself.
   ///
   /// [concurrency] and [repeat] must be at least 1.
   Future<EvalReport> run(
@@ -114,21 +113,23 @@ final class EvalSuite {
   }) async {
     final stopwatch = Stopwatch()..start();
     final label = modelId ?? '';
-    final key = '${label.length}:$label\n${evalCase.prompt}';
+    final key = cacheKey(label, evalCase.prompt);
     String? output;
     var fromCache = false;
     if (cache != null) {
+      // A cache read that throws counts as a miss.
       try {
         output = await cache.read(key);
-      } catch (_) {
+      } on Object catch (_) {
         output = null;
       }
       fromCache = output != null;
     }
     if (output == null) {
+      // The model is caller code: a throw becomes a model error.
       try {
         output = await model(evalCase.prompt);
-      } catch (e, stackTrace) {
+      } on Object catch (e, stackTrace) {
         stopwatch.stop();
         return AttemptResult(
           output: '',
@@ -140,9 +141,10 @@ final class EvalSuite {
       }
       stopwatch.stop();
       if (cache != null) {
+        // A cache write that throws counts as a model error.
         try {
           await cache.write(key, output);
-        } catch (e, stackTrace) {
+        } on Object catch (e, stackTrace) {
           return AttemptResult(
             output: output,
             checks: const [],
@@ -158,9 +160,10 @@ final class EvalSuite {
     final outcomes = <CheckOutcome>[];
     for (final check in evalCase.checks) {
       CheckResult result;
+      // A check is caller code: a throw becomes an error result.
       try {
         result = await check.evaluate(output);
-      } catch (e, stackTrace) {
+      } on Object catch (e, stackTrace) {
         result = CheckResult.error(describeError('check threw', e, stackTrace));
       }
       outcomes.add(

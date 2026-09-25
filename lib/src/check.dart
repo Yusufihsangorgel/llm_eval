@@ -188,9 +188,10 @@ class _IsValidJsonCheck implements Check {
     final where = _where;
     if (where == null) return CheckResult.pass(detail: passDetail);
     bool ok;
+    // The where callback is caller code: a throw becomes an error result.
     try {
       ok = where(decoded);
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       return CheckResult.error(
         describeError('isValidJson where callback threw', e, stackTrace),
       );
@@ -213,9 +214,10 @@ class _PredicateCheck implements Check {
   @override
   Future<CheckResult> evaluate(String output) async {
     bool ok;
+    // The predicate is caller code: a throw becomes an error result.
     try {
       ok = await _test(output);
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       return CheckResult.error(
         describeError('predicate "$description" threw', e, stackTrace),
       );
@@ -246,6 +248,9 @@ class _JudgeCheck implements Check {
     caseSensitive: false,
   );
 
+  // Keep malformed response details short enough to scan in a report.
+  static const int _maxResponseExcerptLength = 200;
+
   @override
   String get description => 'judge score >= $_passAt';
 
@@ -268,15 +273,17 @@ class _JudgeCheck implements Check {
       'satisfies the rubric, 0.0 means it does not satisfy it at all.\n'
       'You may add a short reason on the lines after the score line.\n';
 
-  static String _truncate(String s) =>
-      s.length <= 200 ? s : '${s.substring(0, 200)}...';
+  static String _truncate(String s) => s.length <= _maxResponseExcerptLength
+      ? s
+      : '${s.substring(0, _maxResponseExcerptLength)}...';
 
   @override
   Future<CheckResult> evaluate(String output) async {
     String response;
+    // The judge is caller code: a throw becomes an error result.
     try {
       response = await _judge(_prompt(_rubric, output));
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       return CheckResult.error(
         describeError('judge call threw', e, stackTrace),
       );
