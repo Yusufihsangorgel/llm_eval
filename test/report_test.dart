@@ -309,6 +309,8 @@ Output:
       });
     });
 
+    // The golden pins the VM encoding. On the web a whole double encodes
+    // without its fraction, so 1.0 becomes 1.
     test('encodes to a stable JSON string (golden)', () {
       const expected =
           '{"modelId":null,"repeat":2,"caseCount":1,"passedCount":0,'
@@ -325,7 +327,7 @@ Output:
           '"score":null,"detail":"output does not contain \\"yes\\"",'
           '"error":null}]}]}]}';
       expect(jsonEncode(flakyReport().toJson()), expected);
-    });
+    }, testOn: 'vm');
 
     test('judge scores appear in the JSON output', () {
       const report = EvalReport(

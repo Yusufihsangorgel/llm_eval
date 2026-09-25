@@ -37,18 +37,20 @@ void main() {
       expect(described, isNot(contains(r'C:\')));
     });
 
+    // On the web the frames point at the compiled JavaScript, not at Dart
+    // lines, so the two frame-format tests below run on the VM only.
     test('keeps the line number, which is what makes a frame useful', () {
       expect(
         _describeARealThrow(),
         matches(RegExp(r'error_detail_test\.dart:\d+:\d+')),
       );
-    });
+    }, testOn: 'vm');
 
     test('leaves package: and dart: frames alone', () {
       final described = _describeARealThrow();
       // The isolate frames underneath a test come from dart:.
       expect(described, anyOf(contains('dart:'), contains('package:')));
-    });
+    }, testOn: 'vm');
 
     test('stays on one line, since reports put it in a Markdown list', () {
       expect(_describeARealThrow(), isNot(contains('\n')));
