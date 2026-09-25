@@ -38,7 +38,7 @@ void main() {
     });
 
     // On the web the frames point at the compiled JavaScript, not at Dart
-    // lines, so the two frame-format tests below run on the VM only.
+    // lines. The two frame-format tests below run on the VM only.
     test('keeps the line number, which is what makes a frame useful', () {
       expect(
         _describeARealThrow(),

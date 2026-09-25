@@ -3,6 +3,7 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:llm_eval/io.dart';
@@ -135,6 +136,20 @@ void main() {
       ]);
 
       expect(await caches.first.read('shared'), anyOf('0', '1', '2', '3'));
+      expect(tempDir.listSync(recursive: true).whereType<Directory>(), isEmpty);
+    });
+
+    test('writes from several isolates to one key all complete', () async {
+      // Each isolate has its own copy of a static field. A per-isolate counter
+      // gave every isolate the same first temporary name.
+      final path = tempDir.path;
+      await Future.wait([
+        for (var i = 0; i < 4; i++)
+          Isolate.run(() => FileResponseCache(path).write('shared', 'from $i')),
+      ]);
+
+      final stored = await FileResponseCache(path).read('shared');
+      expect(stored, anyOf('from 0', 'from 1', 'from 2', 'from 3'));
       expect(tempDir.listSync(recursive: true).whereType<Directory>(), isEmpty);
     });
 

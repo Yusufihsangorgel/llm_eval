@@ -310,7 +310,7 @@ Output:
     });
 
     // The golden pins the VM encoding. On the web a whole double encodes
-    // without its fraction, so 1.0 becomes 1.
+    // without its fraction: 1.0 becomes 1.
     test('encodes to a stable JSON string (golden)', () {
       const expected =
           '{"modelId":null,"repeat":2,"caseCount":1,"passedCount":0,'
