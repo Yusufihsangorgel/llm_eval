@@ -108,3 +108,7 @@ dart run example/mcp_tool_eval.dart
 ```
 
 `dart run example/ci_gate.dart` exits 1 by design.
+
+## Contributing
+
+Before changing this repository, read [CONTRIBUTING.md](CONTRIBUTING.md), [package engineering rules](docs/engineering/package.md), and the [debt register](docs/engineering/debt.json). These requirements apply to every contributor. The usage guidance above remains the consumer contract.
