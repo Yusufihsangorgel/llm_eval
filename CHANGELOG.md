@@ -5,8 +5,8 @@
   The library doc comments say the same.
 - The alternatives table and the `vouch` paragraph now show that `llm_eval`
   has a baseline diff.
-- The comparison with `eval` no longer makes claims about that package's
-  source. It lists what `llm_eval` provides.
+- The comparison with `eval` now says when to pick each package. Its claims
+  about `eval` were checked against the source of `eval` 0.0.5.
 - The CI gate screenshot description now says the 429 is reported as an
   error. It is still counted in the pass rate as a case that did not pass.
 

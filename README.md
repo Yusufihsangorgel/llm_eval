@@ -33,12 +33,20 @@ so the rerun is free and byte-identical. `EvalReport.toJUnitXml()`
 `diffAgainstBaseline` (`lib/src/baseline.dart:248`) names the case that flipped
 since the last run you accepted.
 
-**Instead of `eval`.** It has the wider matcher set, including RAG scoring and
-statistics, and it is the closest package on pub.dev to this one. What
-`llm_eval` adds is the part around the checks: `FileResponseCache` stores
-responses, `EvalReport` writes JUnit XML, and `EvalBaseline` supports
-case-level comparisons. The [Alternatives](#alternatives) section has the
-feature table.
+**Instead of `eval`.** Both are pure Dart. The difference is what an eval is:
+in `eval` it is a `package:test` test, and here the suite is a plain function
+call that also runs from a script.
+
+- Pick `llm_eval` when the eval is a build step of its own. It has a response
+  cache (`FileResponseCache`), a JUnit report (`EvalReport.toJUnitXml()`) and a
+  baseline diff (`diffAgainstBaseline`). The source of `eval` 0.0.5 has none of
+  the three.
+- Pick `eval` when you would write the checks inside the `dart test` suite you
+  already have. It also has what this package lacks: matchers for JSON schema,
+  frontmatter, edit distance and RAG scoring, one evaluation run over several
+  models or prompt variants, and score statistics such as mean and percentiles.
+
+The [Alternatives](#alternatives) section has the feature table.
 
 **Reach for it when**
 
