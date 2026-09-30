@@ -5,7 +5,7 @@
 A test harness for LLM outputs in Dart. Write eval cases the way you write
 unit tests: a prompt, a list of checks, and a report you can read in CI.
 
-![A run of example/ci_gate.dart: the Markdown report, a case failing on the phrase "as an ai", the 429 reported as an error instead of a failure, and the gate exiting red](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/ci-gate.gif)
+![A run of example/ci_gate.dart: the Markdown report, a case failing on a banned filler phrase, the 429 reported as an error instead of a failure, and the gate exiting red](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/ci-gate.gif)
 
 That is `dart run example/ci_gate.dart`, recorded, not drawn. A model version
 bump has quietly regressed one answer, one case hit a 429, and the gate goes
