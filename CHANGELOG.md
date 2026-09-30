@@ -1,3 +1,15 @@
+## 1.3.3
+
+- The README no longer says the core library runs on the web. It now says the
+  core uses platform-neutral Dart APIs and that CI does not cover the web.
+  The library doc comments say the same.
+- The alternatives table and the `vouch` paragraph now show that `llm_eval`
+  has a baseline diff.
+- The comparison with `eval` no longer makes claims about that package's
+  source. It lists what `llm_eval` provides.
+- The CI gate screenshot description now says the 429 is reported as an
+  error. It is still counted in the pass rate as a case that did not pass.
+
 ## 1.3.2
 
 - New `example/mcp_tool_eval.dart`. An MCP server's tools return text a

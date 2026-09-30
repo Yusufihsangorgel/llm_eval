@@ -9,7 +9,7 @@ import 'model_call.dart';
 ///
 /// A file-backed implementation, `FileResponseCache`, lives in
 /// `package:llm_eval/io.dart` so that this core library stays free of
-/// `dart:io` and usable on every platform, including the web.
+/// `dart:io`.
 abstract interface class ResponseCache {
   /// Returns the cached response for [key], or null on a miss.
   Future<String?> read(String key);

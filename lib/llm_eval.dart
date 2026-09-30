@@ -4,7 +4,7 @@
 /// [EvalSuite] against any model reachable through a [ModelCall], and
 /// consume the resulting [EvalReport] as Markdown or JSON.
 ///
-/// This library is pure Dart and runs on every platform. The file-backed
+/// This library uses platform-neutral Dart APIs. The file-backed
 /// response cache, `FileResponseCache`, needs `dart:io` and lives in
 /// `package:llm_eval/io.dart`.
 library;

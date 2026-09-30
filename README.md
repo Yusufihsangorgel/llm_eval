@@ -5,7 +5,7 @@
 A test harness for LLM outputs in Dart. Write eval cases the way you write
 unit tests: a prompt, a list of checks, and a report you can read in CI.
 
-![A run of example/ci_gate.dart: the Markdown report, a case failing on the phrase "as an ai", the 429 kept out of the pass rate, and the gate exiting red](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/ci-gate.gif)
+![A run of example/ci_gate.dart: the Markdown report, a case failing on the phrase "as an ai", the 429 reported as an error instead of a failure, and the gate exiting red](https://raw.githubusercontent.com/Yusufihsangorgel/llm_eval/main/doc/ci-gate.gif)
 
 That is `dart run example/ci_gate.dart`, recorded, not drawn. A model version
 bump has quietly regressed one answer, one case hit a 429, and the gate goes
@@ -30,16 +30,15 @@ second run costs another call and can come back different. `llm_eval` keys each
 prompt to a file on disk (`FileResponseCache`, `lib/src/file_response_cache.dart:18`),
 so the rerun is free and byte-identical. `EvalReport.toJUnitXml()`
 (`lib/src/eval_report.dart:203`) writes a report your CI already renders, and
-`BaselineCase` (`lib/src/baseline.dart:6`) names the case that flipped since the
-last run you accepted.
+`diffAgainstBaseline` (`lib/src/baseline.dart:248`) names the case that flipped
+since the last run you accepted.
 
 **Instead of `eval`.** It has the wider matcher set, including RAG scoring and
-statistics, and it is the closest package on pub.dev to this one. It calls the
-provider every time: `apiCallImpl` posts straight to the API with nothing in
-front of it (`lib/src/services/service.dart:169`), and `eval()` reruns the whole
-test function once per `numberOfRunsPerLLM` (`lib/src/eval_base.dart:91`). Grep
-its 5,167 lines of `lib/` for `cache`, `junit`, `xml`, or `baseline` and all four
-return nothing.
+statistics, and it is the closest package on pub.dev to this one. What
+`llm_eval` adds is the part around the checks: `FileResponseCache` stores
+responses, `EvalReport` writes JUnit XML, and `EvalBaseline` supports
+case-level comparisons. The [Alternatives](#alternatives) section has the
+feature table.
 
 **Reach for it when**
 
@@ -182,9 +181,9 @@ its own responses.
 
 ## Caching and CI
 
-The core library is pure Dart and runs on every platform, including the
-web. `FileResponseCache` needs `dart:io` and lives in a separate
-library:
+The core library uses platform-neutral Dart APIs. Web execution is not covered
+by this repository's CI. `FileResponseCache` needs `dart:io` and lives in a
+separate library:
 
 ```dart
 import 'package:llm_eval/llm_eval.dart';
@@ -367,7 +366,7 @@ reading the published source of `eval` 0.0.5, `vouch` 0.1.0 and
 | Response cache | yes | no | via `llm_replay_eval` | yes |
 | Emits JUnit XML itself | yes | no | no | no |
 | LLM-as-judge | yes | yes | via `llm_replay_eval` | yes |
-| Baseline diff | no | no | yes | no |
+| Baseline diff | yes | no | yes | no |
 | Several models over one suite | no | yes | no | no |
 
 [`eval`](https://pub.dev/packages/eval) is the closest neighbour: pure Dart,
@@ -379,8 +378,8 @@ variants over one suite, and eval statistics with a declared winner. It has no
 response cache, so every rerun calls the model again.
 
 [`vouch`](https://pub.dev/packages/vouch) freezes a baseline of a run and diffs
-later runs against it. That shows what changed when you swapped the model,
-which `llm_eval` cannot do today. It is Flutter-only and layers on
+later runs against it. `llm_eval` has a baseline diff too, at case level, and it
+reports a model swap in the diff. `vouch` is Flutter-only and layers on
 `llm_replay_eval`.
 
 [`llm_replay_eval`](https://pub.dev/packages/llm_replay_eval) records and
