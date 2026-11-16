@@ -1,5 +1,11 @@
 ## 1.3.3
 
+- `FileResponseCache` no longer fails when two isolates of one process write
+  the same key. It named the temporary file from the process id and a static
+  counter. Every isolate has its own copy of the counter, which gave them
+  all the same name, and one rename then threw a `PathNotFoundException`.
+  Each write now stages its response in a fresh temporary directory inside
+  the cache directory, and removes it even when the write fails.
 - The README no longer says the core library runs on the web. It now says the
   core uses platform-neutral Dart APIs and that CI does not cover the web.
   The library doc comments say the same.

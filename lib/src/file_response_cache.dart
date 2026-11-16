@@ -21,8 +21,6 @@ final class FileResponseCache implements ResponseCache {
 
   final Directory _directory;
 
-  static int _tempCounter = 0;
-
   File _fileFor(String key) {
     final digest = sha256.convert(utf8.encode(key)).toString();
     return File('${_directory.path}/$digest.txt');
@@ -39,8 +37,17 @@ final class FileResponseCache implements ResponseCache {
   Future<void> write(String key, String response) async {
     await _directory.create(recursive: true);
     final target = _fileFor(key);
-    final temp = File('${target.path}.tmp.$pid.${_tempCounter++}');
-    await temp.writeAsString(response, flush: true);
-    await temp.rename(target.path);
+    // A fresh directory per write: the operating system picks a name no other
+    // writer holds, whether that writer is in this isolate, another isolate or
+    // another process. A process id plus a counter is not enough, because
+    // every isolate in a process has its own copy of the counter.
+    final tempDirectory = await _directory.createTemp('.llm_eval_tmp_');
+    try {
+      final temp = File('${tempDirectory.path}/response');
+      await temp.writeAsString(response, flush: true);
+      await temp.rename(target.path);
+    } finally {
+      await tempDirectory.delete(recursive: true);
+    }
   }
 }

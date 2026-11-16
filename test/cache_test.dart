@@ -1,10 +1,37 @@
+@TestOn('vm')
+library;
+
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:llm_eval/io.dart';
 import 'package:llm_eval/llm_eval.dart';
 import 'package:test/test.dart';
+
+const _isolateWriteSize = 256 * 1024;
+
+/// The response isolate [index] writes: one repeated letter. A stored file
+/// that mixes two writers is then easy to spot.
+String _isolatePayload(int index) =>
+    String.fromCharCode(0x61 + index) * _isolateWriteSize;
+
+/// Writes [rounds] responses to one key from a fresh cache, after waiting for
+/// [startAt] so the isolates overlap.
+Future<void> _writeSharedKey(
+  String path,
+  int index,
+  DateTime startAt,
+  int rounds,
+) async {
+  final wait = startAt.difference(DateTime.now());
+  if (!wait.isNegative) await Future<void>.delayed(wait);
+  final cache = FileResponseCache(path);
+  for (var round = 0; round < rounds; round++) {
+    await cache.write('shared', _isolatePayload(index));
+  }
+}
 
 /// A map-backed [ResponseCache] for tests.
 class MemoryCache implements ResponseCache {
@@ -112,8 +139,54 @@ void main() {
       );
 
       final leftovers = tempDir
-          .listSync()
-          .where((entity) => entity.path.contains('.tmp.'))
+          .listSync(recursive: true)
+          .where((entity) => !entity.path.endsWith('.txt'))
+          .toList();
+      expect(leftovers, isEmpty);
+    });
+
+    test('writes from several isolates to one key all complete', () async {
+      // A static counter is per isolate. Every isolate used to start at the
+      // same temporary name for the same key.
+      const isolates = 4;
+      final path = tempDir.path;
+      final startAt = DateTime.now().add(const Duration(milliseconds: 500));
+
+      final failures = <Object>[];
+      await Future.wait([
+        for (var i = 0; i < isolates; i++)
+          Isolate.run(() => _writeSharedKey(path, i, startAt, 10)).catchError((
+            Object error,
+          ) {
+            failures.add(error);
+          }),
+      ]);
+
+      expect(failures, isEmpty, reason: 'every isolate finishes its writes');
+      final stored = await FileResponseCache(path).read('shared');
+      expect([
+        for (var i = 0; i < isolates; i++) _isolatePayload(i),
+      ], contains(stored));
+      expect(
+        tempDir
+            .listSync(recursive: true)
+            .where((e) => !e.path.endsWith('.txt')),
+        isEmpty,
+        reason: 'only the cache entry remains',
+      );
+    });
+
+    test('a failed write leaves no temporary files behind', () async {
+      final cache = FileResponseCache(tempDir.path);
+      final digest = sha256.convert(utf8.encode('k')).toString();
+      // A directory in the entry's place makes the final rename fail.
+      Directory('${tempDir.path}/$digest.txt').createSync();
+
+      await expectLater(cache.write('k', 'response'), throwsA(anything));
+
+      final leftovers = tempDir
+          .listSync(recursive: true)
+          .where((entity) => !entity.path.endsWith('$digest.txt'))
           .toList();
       expect(leftovers, isEmpty);
     });
